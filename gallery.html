@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMU Fence — Gallery</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+  <style>
+    .gallery-filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 16px;
+      border: 1.5px solid var(--gray-300);
+      background: white;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-weight: 500;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--cmu-red);
+      border-color: var(--cmu-red);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+
+<div class="page-header">
+  <h1>🖼️ Fence Gallery</h1>
+  <p>A record of CMU Fence paintings — past designs, historic moments, and community memories.</p>
+</div>
+
+<div class="container">
+
+  <!-- Recent gallery -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <h2 style="font-size:1.05rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-600)">📸 Recent Fences</h2>
+    <div class="gallery-filter-bar" style="margin:0">
+      <button class="filter-btn active" onclick="filterGallery('all', this)">All</button>
+      <button class="filter-btn" onclick="filterGallery('2026', this)">2026</button>
+      <button class="filter-btn" onclick="filterGallery('2025', this)">2025</button>
+    </div>
+  </div>
+
+  <div class="gallery-grid" id="gallery-grid"></div>
+
+  <!-- Upload your photo -->
+  <div class="alert alert-info" style="margin:24px 0">
+    <span>📸</span>
+    <span>
+      Did your org paint the fence? Submit photos to
+      <strong>@cmufence</strong> on Instagram or email
+      <a href="mailto:sg-fence@andrew.cmu.edu">sg-fence@andrew.cmu.edu</a>
+      to be featured in the gallery!
+    </span>
+  </div>
+
+  <!-- Historic moments -->
+  <div id="history" style="scroll-margin-top:80px">
+    <h2 style="font-size:1.05rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-600);margin-bottom:20px">
+      📜 Historic Moments
+    </h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="historic-grid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Gallery item modal -->
+<div class="modal-overlay" id="gallery-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3 id="gm-title">Fence Painting</h3>
+      <button class="modal-close" onclick="document.getElementById('gallery-modal').classList.remove('open')">✕</button>
+    </div>
+    <div id="gm-body"></div>
+  </div>
+</div>
+
+<div id="footer-mount"></div>
+
+<script src="js/app.js"></script>
+<script>
+  document.getElementById('nav-mount').innerHTML = navHTML('gallery');
+  document.getElementById('footer-mount').innerHTML = footerHTML();
+
+  document.getElementById('gallery-modal').onclick = e => {
+    if (e.target === document.getElementById('gallery-modal'))
+      document.getElementById('gallery-modal').classList.remove('open');
+  };
+
+  let currentFilter = 'all';
+
+  // Generate a nice gradient background from colors
+  function makeGradient(colors) {
+    if (!colors || !colors.length) return '#C41230';
+    if (colors.length === 1) return colors[0];
+    return `linear-gradient(135deg, ${colors.join(', ')})`;
+  }
+
+  function filterGallery(year, btn) {
+    currentFilter = year;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGallery();
+  }
+
+  function renderGallery() {
+    const items = getGallery().filter(g => {
+      if (currentFilter === 'all') return true;
+      return g.date.startsWith(currentFilter);
+    });
+
+    if (!items.length) {
+      document.getElementById('gallery-grid').innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="icon">🖼️</div>
+          <h3>No fences for this period</h3>
+          <p>Try a different filter.</p>
+        </div>
+      `;
+      return;
+    }
+
+    document.getElementById('gallery-grid').innerHTML = items.map(g => `
+      <div class="gallery-item" onclick="openGalleryModal(${g.id})">
+        <div class="gallery-img" style="background:${makeGradient(g.colors)}">
+          <div class="fence-design">
+            <span style="font-size:3.5rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))">${g.emoji}</span>
+            <span style="color:rgba(255,255,255,0.9);font-size:0.8rem;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,0.5);max-width:90%;text-align:center;padding:0 8px">${g.org}</span>
+          </div>
+        </div>
+        <div class="gallery-caption">
+          <div class="org">${g.org}</div>
+          <div class="desc">${g.description}</div>
+          <div class="date">${fmt(g.date)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openGalleryModal(id) {
+    const g = getGallery().find(x => x.id === id);
+    if (!g) return;
+    document.getElementById('gm-title').textContent = g.org;
+    document.getElementById('gm-body').innerHTML = `
+      <div style="width:100%;height:220px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:${makeGradient(g.colors)};margin-bottom:18px;position:relative;overflow:hidden">
+        <div style="text-align:center">
+          <div style="font-size:5rem;filter:drop-shadow(0 3px 10px rgba(0,0,0,0.35))">${g.emoji}</div>
+          <div style="color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,0.5);margin-top:6px">${g.org}</div>
+        </div>
+      </div>
+      <p style="color:var(--gray-600);font-size:0.88rem;margin-bottom:6px">📅 ${fmt(g.date)}</p>
+      <p style="font-size:0.95rem;margin-bottom:14px">${g.description}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="https://instagram.com/cmufence" target="_blank" class="btn btn-outline btn-sm">📸 @cmufence</a>
+      </div>
+    `;
+    document.getElementById('gallery-modal').classList.add('open');
+  }
+
+  // Historic moments
+  const HISTORIC = [
+    { year: '1923', text: 'The class of 1923 built the original "Senior Fence" — a gathering spot exclusively for seniors on campus.' },
+    { year: '1960s', text: 'The tradition of painting the fence becomes the dominant Fence activity, open to all CMU students.' },
+    { year: '1974', text: 'The Fence is painted when President Nixon resigned — a landmark use of the Fence as political expression.' },
+    { year: '1980', text: '"Imagine" lyrics are painted on the Fence as a memorial to John Lennon following his passing.' },
+    { year: '1989', text: 'The west end of the original fence collapses and is rebuilt with pressure-treated lumber and concrete.' },
+    { year: '1993', text: 'The east end is also rebuilt — the modern Fence as we know it today is now in place.' },
+    { year: '2001', text: 'On September 11, the Fence is painted in remembrance of the victims and becomes a candlelight vigil gathering point.' },
+    { year: '2008', text: 'Following the passing of Professor Randy Pausch ("The Last Lecture"), the Fence is painted in his honor.' },
+    { year: '2011', text: '"Operation Heal the Fence" attracts hundreds of students to restore the Fence after it was damaged with a hacksaw.' },
+    { year: '2020', text: 'During COVID-19, "CYA on Zoom" is painted — a relatable message for the entire campus community.' },
+    { year: '2020', text: 'After someone altered a "Black Lives Matter" message, students quickly repainted the Fence to restore the original.' },
+    { year: '2024', text: 'Student Government and university leadership add permanent plaques near The Fence commemorating its core values.' },
+  ];
+
+  function renderHistoric() {
+    document.getElementById('historic-grid').innerHTML = HISTORIC.map(h => `
+      <div class="card" style="margin-bottom:0;border-left:4px solid var(--cmu-red)">
+        <div class="timeline-year" style="margin-bottom:6px">${h.year}</div>
+        <div style="font-size:0.88rem;color:var(--gray-800);line-height:1.5">${h.text}</div>
+      </div>
+    `).join('');
+  }
+
+  renderGallery();
+  renderHistoric();
+</script>
+</body>
+</html>
