@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMU Fence — Designs</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .design-preview {
+      width: 100%;
+      aspect-ratio: 4/1;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .fence-boards {
+      position: absolute;
+      inset: 0;
+      display: flex;
+    }
+    .fence-board {
+      flex: 1;
+      border-right: 2px solid rgba(0,0,0,0.12);
+      position: relative;
+    }
+    .design-overlay-text {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 20px;
+    }
+    .design-mini-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .design-mini-card:hover { transform: translateY(-2px); }
+    .design-mini-preview {
+      aspect-ratio: 4/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+    .design-mini-info { padding: 12px; }
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { outline: 3px solid var(--cmu-dark); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <span class="fence-icon">🏚️</span>
+    <span>CMU Fence</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Feed</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+    <li><a href="queue.html">Queue</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="design.html">Designs</a></li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#">More ▾</a>
+      <div class="dropdown-menu">
+        <a href="calendar.html">📅 Calendar &amp; Schedule</a>
+        <a href="queue.html">📋 Painting Queue</a>
+        <a href="gallery.html">🖼️ Past Fences</a>
+        <a href="design.html">🎨 Fence Designs</a>
+        <a href="about.html">ℹ️ About The Fence</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">👤 CMU Student</div>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">🎨 Fence Designs</h1>
+  <p class="page-subtitle">Preview planned designs + submit your own concept</p>
+
+  <div class="grid-2">
+    <!-- Left: upcoming designs -->
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:14px">🖌️ Upcoming Designs</div>
+        <div id="upcomingDesigns"></div>
+      </div>
+
+      <!-- Design detail view -->
+      <div id="designDetail" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="designDetailTitle"></div>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('designDetail').style.display='none'">✕</button>
+          </div>
+          <div id="designDetailPreview" class="design-preview"></div>
+          <div id="designDetailInfo"></div>
+          <div class="rsvp-group" id="designDetailRsvp"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: design builder -->
+    <div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">🖼️ Design Preview Builder</div>
+        <p style="font-size:0.87rem;color:#888;margin-bottom:16px">
+          Visualize your fence concept. This preview represents the fence's flat painted surface.
+        </p>
+
+        <!-- Live preview -->
+        <div id="livePreview" class="design-preview" style="background:#c8956a">
+          <div class="fence-boards" id="fenceBoards"></div>
+          <div class="design-overlay-text" id="previewText">
+            <div id="previewEmoji" style="font-size:3rem"></div>
+            <div id="previewTitle" style="color:white;font-size:1.4rem;font-weight:800;text-shadow:2px 2px 8px rgba(0,0,0,0.6)"></div>
+            <div id="previewSubtitle" style="color:rgba(255,255,255,0.85);font-size:0.9rem;margin-top:4px;text-shadow:1px 1px 4px rgba(0,0,0,0.5)"></div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="form-group">
+          <label>Main Message / Title</label>
+          <input type="text" id="designTitle" placeholder="e.g. Go Tartans! 🏴󠁧󠁢󠁳󠁣󠁴󠁿" oninput="updatePreview()">
+        </div>
+
+        <div class="form-group">
+          <label>Subtitle / Secondary Text</label>
+          <input type="text" id="designSub" placeholder="e.g. CS Club @ CMU • Spring 2026" oninput="updatePreview()">
+        </div>
+
+        <div class="form-group">
+          <label>Main Emoji / Icon</label>
+          <input type="text" id="designEmoji" placeholder="🎓" maxlength="4" oninput="updatePreview()" style="width:80px">
+        </div>
+
+        <div class="form-group">
+          <label>Background Color</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+            <div class="color-swatch selected" style="background:#c8956a" onclick="setColor('#c8956a',this)" title="Wood"></div>
+            <div class="color-swatch" style="background:#c41230" onclick="setColor('#c41230',this)" title="CMU Red"></div>
+            <div class="color-swatch" style="background:#1a1a2e" onclick="setColor('#1a1a2e',this)" title="Dark"></div>
+            <div class="color-swatch" style="background:#2980b9" onclick="setColor('#2980b9',this)" title="Blue"></div>
+            <div class="color-swatch" style="background:#27ae60" onclick="setColor('#27ae60',this)" title="Green"></div>
+            <div class="color-swatch" style="background:#8e44ad" onclick="setColor('#8e44ad',this)" title="Purple"></div>
+            <div class="color-swatch" style="background:#f39c12" onclick="setColor('#f39c12',this)" title="Gold"></div>
+            <div class="color-swatch" style="background:#e74c3c" onclick="setColor('#e74c3c',this)" title="Bright Red"></div>
+            <div class="color-swatch" style="background:#2c3e50" onclick="setColor('#2c3e50',this)" title="Navy"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Organization (for saving)</label>
+          <input type="text" id="designOrg" placeholder="Your club/org name">
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="designDesc" placeholder="Describe your design concept in more detail..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveDesign()" style="flex:1">💾 Save Design</button>
+          <button class="btn btn-secondary" onclick="clearDesign()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  CMU Fence Tracker &mdash; Unofficial Student Platform &mdash; <a href="about.html">About The Fence</a>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+<script>
+let currentBg = '#c8956a';
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderFenceBoards();
+  renderUpcomingDesigns();
+});
+
+function renderFenceBoards() {
+  const boards = document.getElementById('fenceBoards');
+  boards.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const b = document.createElement('div');
+    b.className = 'fence-board';
+    boards.appendChild(b);
+  }
+}
+
+function updatePreview() {
+  const title = document.getElementById('designTitle').value;
+  const sub = document.getElementById('designSub').value;
+  const emoji = document.getElementById('designEmoji').value;
+  document.getElementById('previewTitle').textContent = title;
+  document.getElementById('previewSubtitle').textContent = sub;
+  document.getElementById('previewEmoji').textContent = emoji;
+}
+
+function setColor(color, el) {
+  currentBg = color;
+  document.getElementById('livePreview').style.background = color;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveDesign() {
+  const title = document.getElementById('designTitle').value.trim();
+  const org = document.getElementById('designOrg').value.trim();
+  const desc = document.getElementById('designDesc').value.trim();
+  const emoji = document.getElementById('designEmoji').value.trim() || '🎨';
+  const sub = document.getElementById('designSub').value.trim();
+
+  if (!title) { showToast('Please enter a main message/title.'); return; }
+
+  const designs = DB.get('savedDesigns', []);
+  designs.unshift({
+    id: Date.now(),
+    title, org, desc, emoji, sub, color: currentBg,
+    savedAt: new Date().toISOString().slice(0,10)
+  });
+  DB.set('savedDesigns', designs);
+  showToast('Design saved!');
+  renderUpcomingDesigns();
+}
+
+function clearDesign() {
+  ['designTitle','designSub','designEmoji','designOrg','designDesc'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  updatePreview();
+}
+
+function renderUpcomingDesigns() {
+  const events = DB.get('events', []);
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date));
+  const savedDesigns = DB.get('savedDesigns', []);
+
+  let html = '';
+
+  if (upcoming.length) {
+    html += `<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;color:#aaa;letter-spacing:0.05em;margin-bottom:8px">From Queue</div>`;
+    html += upcoming.map(ev => {
+      const d = new Date(ev.date + 'T12:00:00');
+      const dateStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      return `<div class="design-mini-card" onclick="showDesignDetail(${ev.id})">
+        <div class="design-mini-preview" style="background:linear-gradient(135deg,${ev.color || '#c41230'}aa,${ev.color || '#c41230'}55)">
+          ${ev.imageEmoji}
+        </div>
+        <div class="design-mini-info">
+          <div style="font-weight:600">${ev.org}</div>
+          <div style="font-size:0.82rem;color:#888">${dateStr} &nbsp;•&nbsp; ${ev.attendees.going.length} going</div>
+          <div style="font-size:0.85rem;color:#555;margin-top:4px">${ev.design}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  if (savedDesigns.length) {
+    html += `<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;color:#aaa;letter-spacing:0.05em;margin:16px 0 8px">Saved Concepts</div>`;
+    html += savedDesigns.map(d => `
+      <div class="design-mini-card">
+        <div class="design-mini-preview" style="background:${d.color || '#888'}">
+          <span>${d.emoji}</span>
+        </div>
+        <div class="design-mini-info">
+          <div style="font-weight:600">${d.title}</div>
+          ${d.org ? `<div style="font-size:0.82rem;color:#888">${d.org}</div>` : ''}
+          ${d.desc ? `<div style="font-size:0.85rem;color:#555;margin-top:4px">${d.desc}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (!html) {
+    html = '<p style="color:#888;font-size:0.9rem">No designs yet. Create one using the builder!</p>';
+  }
+
+  document.getElementById('upcomingDesigns').innerHTML = html;
+}
+
+function showDesignDetail(id) {
+  const events = DB.get('events', []);
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+
+  const d = new Date(ev.date + 'T12:00:00');
+  const dateStr = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+  const rsvp = getRsvp(id);
+
+  document.getElementById('designDetailTitle').textContent = `${ev.imageEmoji} ${ev.org}`;
+
+  document.getElementById('designDetailPreview').innerHTML = `
+    <div class="fence-boards">${Array.from({length:12}).map(() => '<div class="fence-board"></div>').join('')}</div>
+    <div class="design-overlay-text">
+      <div style="font-size:3rem">${ev.imageEmoji}</div>
+      <div style="color:white;font-size:1.3rem;font-weight:800;text-shadow:2px 2px 8px rgba(0,0,0,0.6)">${ev.org}</div>
+      <div style="color:rgba(255,255,255,0.85);font-size:0.85rem;text-shadow:1px 1px 4px rgba(0,0,0,0.5)">${ev.design}</div>
+    </div>
+  `;
+  document.getElementById('designDetailPreview').style.background = ev.color || '#c8956a';
+
+  document.getElementById('designDetailInfo').innerHTML = `
+    <div style="font-size:0.88rem;color:#666;margin-bottom:10px">📅 ${dateStr} &nbsp;•&nbsp; Midnight–Sunrise</div>
+    <div style="font-size:0.92rem;color:#444">${ev.design}</div>
+    <div style="font-size:0.85rem;color:#888;margin-top:8px">✅ ${ev.attendees.going.length} going &nbsp; 🤔 ${ev.attendees.maybe.length} maybe</div>
+  `;
+
+  document.getElementById('designDetailRsvp').innerHTML = `
+    <button class="rsvp-btn going ${rsvp==='going'?'active':''}" onclick="designRsvp(${id},'going')">✅ Going</button>
+    <button class="rsvp-btn maybe ${rsvp==='maybe'?'active':''}" onclick="designRsvp(${id},'maybe')">🤔 Maybe</button>
+    <button class="rsvp-btn notgoing ${rsvp==='notgoing'?'active':''}" onclick="designRsvp(${id},'notgoing')">❌ Can't Go</button>
+  `;
+
+  document.getElementById('designDetail').style.display = 'block';
+}
+
+function designRsvp(id, status) {
+  const current = getRsvp(id);
+  setRsvp(id, current === status ? null : status);
+  showToast('RSVP updated!');
+  showDesignDetail(id);
+}
+</script>
+</body>
+</html>

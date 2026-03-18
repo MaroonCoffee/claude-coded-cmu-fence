@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMU Fence — About The Fence</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--cmu-red), transparent);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      background: var(--cmu-red);
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px var(--cmu-red);
+    }
+    .timeline-year {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--cmu-red);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .timeline-text { font-size: 0.92rem; color: #555; line-height: 1.6; margin-top: 2px; }
+
+    .rule-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: flex-start;
+    }
+    .rule-item:last-child { border-bottom: none; }
+    .rule-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .rule-text h4 { font-size: 0.95rem; font-weight: 700; color: var(--cmu-dark); }
+    .rule-text p { font-size: 0.87rem; color: #666; margin-top: 2px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <span class="fence-icon">🏚️</span>
+    <span>CMU Fence</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Feed</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+    <li><a href="queue.html">Queue</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="design.html">Designs</a></li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#">More ▾</a>
+      <div class="dropdown-menu">
+        <a href="calendar.html">📅 Calendar &amp; Schedule</a>
+        <a href="queue.html">📋 Painting Queue</a>
+        <a href="gallery.html">🖼️ Past Fences</a>
+        <a href="design.html">🎨 Fence Designs</a>
+        <a href="about.html">ℹ️ About The Fence</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">👤 CMU Student</div>
+</nav>
+
+<div style="background:linear-gradient(135deg,#1a1a2e,#c41230);padding:48px 20px;color:white">
+  <div style="max-width:800px;margin:0 auto;text-align:center">
+    <div style="font-size:4rem;margin-bottom:12px">🏚️</div>
+    <h1 style="font-size:2.5rem;font-weight:800">The CMU Fence</h1>
+    <p style="opacity:0.8;font-size:1.1rem;margin-top:10px;max-width:560px;margin-left:auto;margin-right:auto">
+      Carnegie Mellon's most iconic canvas — a student-centered space for free expression since 1923.
+    </p>
+  </div>
+</div>
+
+<div class="container" style="max-width:800px">
+
+  <!-- Rules -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title" style="margin-bottom:16px">📜 The Official Rules</div>
+
+    <div class="rule-item">
+      <div class="rule-icon">🎓</div>
+      <div class="rule-text">
+        <h4>CMU Students Only</h4>
+        <p>The Fence may only be painted by Carnegie Mellon University-affiliated students. Only students guarding the Fence, and those they willingly associate with, may paint.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon">🕛</div>
+      <div class="rule-text">
+        <h4>Midnight to Sunrise</h4>
+        <p>The Fence must be painted between midnight and sunrise only. Any painting outside this timeframe is considered vandalism, excluding corrective work to undo vandalism.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon">👥</div>
+      <div class="rule-text">
+        <h4>Guarded at All Times</h4>
+        <p>The Fence is considered guarded when at least two students are in the surrounding gravel area. Guards must remain at all times during painting.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon">🖌️</div>
+      <div class="rule-text">
+        <h4>Brushes Only</h4>
+        <p>The Fence may only be hand-painted with paint brushes. No spray paint, rollers, or other methods are permitted.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon">🎨</div>
+      <div class="rule-text">
+        <h4>Fully Covered</h4>
+        <p>The Fence must be completely covered with paint. Partial paintings are considered vandalism.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon">🧹</div>
+      <div class="rule-text">
+        <h4>Clean Up After Yourself</h4>
+        <p>All paint and painting materials must stay in the gravel area surrounding the Fence. Painters are liable for cleanup of all resources used.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title" style="margin-bottom:20px">📖 History of The Fence</div>
+
+    <p style="font-size:0.95rem;color:#555;line-height:1.7;margin-bottom:20px">
+      The Fence is an iconic piece of Carnegie Mellon's Pittsburgh campus. Serving as a student-centered space for free expression and community, The Fence has brought the CMU community together for more than 100 years.
+    </p>
+
+    <p style="font-size:0.95rem;color:#555;line-height:1.7;margin-bottom:20px">
+      The earliest documented reference to the idea of "a fence" was in 1913. However, the building of The Fence was pushed to 1923, when the class of 1923 built what they referred to as the Senior Fence — originally built for seniors, by seniors.
+    </p>
+
+    <p style="font-size:0.95rem;color:#555;line-height:1.7;margin-bottom:24px">
+      By the 1960s, the tradition of painting the fence was in full swing. In 1989, the west end collapsed and was replaced; in 1993, the east end followed. Today, the Fence is for all students at Carnegie Mellon.
+    </p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">1923</div>
+        <div class="timeline-text">Class of 1923 builds the "Senior Fence" — originally reserved for seniors only.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1960s</div>
+        <div class="timeline-text">The tradition of painting the fence becomes established campus-wide.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1974</div>
+        <div class="timeline-text">The Fence is painted when President Nixon resigned.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1980</div>
+        <div class="timeline-text">The Fence was painted with "Imagine" lyrics as a memorial to John Lennon.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1989</div>
+        <div class="timeline-text">The west end of the Fence collapsed and was replaced with pressure-treated lumber and concrete.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1993</div>
+        <div class="timeline-text">The east end of The Fence followed suit with reconstruction.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2001</div>
+        <div class="timeline-text">On 9/11, The Fence was painted in remembrance of victims. It doubled as a gathering spot for a candlelight vigil.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2008</div>
+        <div class="timeline-text">After the passing of CMU Professor Randy Pausch, The Fence was painted in his honor.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2011</div>
+        <div class="timeline-text">"Operation Heal the Fence" attracted hundreds after first-year art students damaged The Fence with a hacksaw.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2020</div>
+        <div class="timeline-text">During COVID-19, The Fence was painted with "CYA on Zoom." The "Black Lives Matter" message was quickly restored after being changed.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2024</div>
+        <div class="timeline-text">Student Government helped cement core tenets of The Fence — free expression, respect, and student-centered foundation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About platform -->
+  <div class="card" style="background:#fafafa">
+    <div class="card-title" style="margin-bottom:12px">🌐 About This Platform</div>
+    <p style="font-size:0.9rem;color:#555;line-height:1.7">
+      CMU Fence Tracker is an unofficial student-built platform to help coordinate fence paintings, check upcoming schedules, and engage with the community. It is not affiliated with Carnegie Mellon Student Government.
+    </p>
+    <p style="font-size:0.9rem;color:#555;line-height:1.7;margin-top:10px">
+      Questions or concerns about The Fence? Contact the <strong>Student Government Poster Policy Arbiter</strong> through CMU Student Government.
+    </p>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <a href="queue.html" class="btn btn-primary btn-sm">📋 Join the Queue</a>
+      <a href="gallery.html" class="btn btn-secondary btn-sm">🖼️ View Gallery</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  CMU Fence Tracker &mdash; Unofficial Student Platform &mdash; <a href="about.html">About The Fence</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

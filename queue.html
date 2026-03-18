@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMU Fence — Painting Queue</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <span class="fence-icon">🏚️</span>
+    <span>CMU Fence</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Feed</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+    <li><a href="queue.html">Queue</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="design.html">Designs</a></li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#">More ▾</a>
+      <div class="dropdown-menu">
+        <a href="calendar.html">📅 Calendar &amp; Schedule</a>
+        <a href="queue.html">📋 Painting Queue</a>
+        <a href="gallery.html">🖼️ Past Fences</a>
+        <a href="design.html">🎨 Fence Designs</a>
+        <a href="about.html">ℹ️ About The Fence</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">👤 CMU Student</div>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">📋 Painting Queue</h1>
+  <p class="page-subtitle">Organizations sign up for their preferred painting date</p>
+
+  <div class="grid-2">
+    <!-- Left: Queue table -->
+    <div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('upcoming',this)">Upcoming</button>
+        <button class="tab" onclick="switchTab('all',this)">All Registered</button>
+        <button class="tab" onclick="switchTab('completed',this)">Completed</button>
+      </div>
+
+      <div id="queueTable"></div>
+    </div>
+
+    <!-- Right: Register form -->
+    <div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">✏️ Register Your Organization</div>
+
+        <div class="form-group">
+          <label>Organization / Club Name *</label>
+          <input type="text" id="orgName" placeholder="e.g. CMU Drama Club">
+        </div>
+
+        <div class="form-group">
+          <label>Contact Email *</label>
+          <input type="email" id="orgEmail" placeholder="your@andrew.cmu.edu">
+        </div>
+
+        <div class="form-group">
+          <label>Preferred Painting Date *</label>
+          <input type="date" id="orgDate" min="">
+        </div>
+
+        <div class="form-group">
+          <label>Alternate Date</label>
+          <input type="date" id="orgDateAlt" min="">
+        </div>
+
+        <div class="form-group">
+          <label>Design Description *</label>
+          <textarea id="orgDesign" placeholder="Describe what you plan to paint on the fence..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Design Emoji (for display)</label>
+          <input type="text" id="orgEmoji" placeholder="🎨" maxlength="4">
+        </div>
+
+        <div class="form-group">
+          <label>Expected # of Participants</label>
+          <select id="orgCount">
+            <option value="">Select range</option>
+            <option>2–5 people</option>
+            <option>6–10 people</option>
+            <option>11–20 people</option>
+            <option>20+ people</option>
+          </select>
+        </div>
+
+        <div style="background:#fff8f5;border:1.5px solid #fdddd5;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;color:#666">
+          ⚠️ By submitting, you agree to follow the <a href="about.html" style="color:var(--cmu-red)">CMU Fence Rules</a> and the Student Government's Graffiti &amp; Poster Policy.
+        </div>
+
+        <button class="btn btn-primary" onclick="submitQueue()" style="width:100%">📋 Request a Slot</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title">🎉 Slot Requested!</div>
+    <p style="font-size:0.95rem;color:#555;line-height:1.6" id="confirmBody"></p>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal()">Awesome, thanks!</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  CMU Fence Tracker &mdash; Unofficial Student Platform &mdash; <a href="about.html">About The Fence</a>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+<script>
+// Set min date to tomorrow
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const minDate = tomorrow.toISOString().slice(0,10);
+document.getElementById('orgDate').min = minDate;
+document.getElementById('orgDateAlt').min = minDate;
+
+let currentTab = 'upcoming';
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderQueue();
+});
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderQueue();
+}
+
+function renderQueue() {
+  const events = DB.get('events', []);
+  const today = new Date().toISOString().slice(0,10);
+
+  let filtered;
+  if (currentTab === 'upcoming') filtered = events.filter(e => e.date >= today);
+  else if (currentTab === 'completed') filtered = events.filter(e => e.date < today);
+  else filtered = events;
+
+  filtered = [...filtered].sort((a,b) => a.date.localeCompare(b.date));
+
+  const container = document.getElementById('queueTable');
+  if (!filtered.length) {
+    container.innerHTML = '<p style="color:#888;padding:16px 0">No events in this category.</p>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="queue-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Organization</th>
+            <th>Date</th>
+            <th>RSVPs</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map((ev, i) => {
+            const d = new Date(ev.date + 'T12:00:00');
+            const dateStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            const isPast = ev.date < today;
+            const goingCount = ev.attendees.going.length;
+            const statusBadge = isPast
+              ? '<span class="badge badge-gray">Completed</span>'
+              : '<span class="badge badge-green">Scheduled</span>';
+            return `<tr>
+              <td style="color:#aaa;font-size:0.85rem">${i+1}</td>
+              <td>
+                <span style="font-size:1.2rem">${ev.imageEmoji}</span>
+                <strong style="margin-left:6px">${ev.org}</strong>
+              </td>
+              <td style="white-space:nowrap">📅 ${dateStr}</td>
+              <td>✅ ${goingCount}</td>
+              <td>${statusBadge}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function submitQueue() {
+  const orgName = document.getElementById('orgName').value.trim();
+  const orgEmail = document.getElementById('orgEmail').value.trim();
+  const orgDate = document.getElementById('orgDate').value;
+  const orgDesign = document.getElementById('orgDesign').value.trim();
+  const orgEmoji = document.getElementById('orgEmoji').value.trim() || '🎨';
+  const orgCount = document.getElementById('orgCount').value;
+
+  if (!orgName) { showToast('Please enter your organization name.'); return; }
+  if (!orgEmail || !orgEmail.includes('@')) { showToast('Please enter a valid email.'); return; }
+  if (!orgDate) { showToast('Please select a date.'); return; }
+  if (!orgDesign) { showToast('Please describe your design.'); return; }
+
+  // Check if date is taken
+  const events = DB.get('events', []);
+  if (events.find(e => e.date === orgDate)) {
+    showToast('That date is already taken! Please choose another.');
+    return;
+  }
+
+  const newEvent = {
+    id: Date.now(),
+    org: orgName,
+    date: orgDate,
+    design: orgDesign,
+    attendees: { going: [], maybe: [], notgoing: [] },
+    imageEmoji: orgEmoji,
+    color: '#c41230',
+    contact: orgEmail,
+    participants: orgCount
+  };
+
+  events.push(newEvent);
+  DB.set('events', events);
+
+  const d = new Date(orgDate + 'T12:00:00');
+  const dateStr = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  document.getElementById('confirmBody').innerHTML = `
+    <strong>${orgName}</strong> has been added to the queue!<br><br>
+    📅 Scheduled for: <strong>${dateStr}</strong><br>
+    🎨 Design: ${orgDesign}<br><br>
+    A confirmation would normally be sent to <strong>${orgEmail}</strong>. Good luck painting!
+  `;
+
+  document.getElementById('confirmModal').classList.add('open');
+
+  // Reset form
+  ['orgName','orgEmail','orgDate','orgDateAlt','orgDesign','orgEmoji'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('orgCount').value = '';
+
+  currentTab = 'upcoming';
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  renderQueue();
+}
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('open');
+}
+</script>
+</body>
+</html>

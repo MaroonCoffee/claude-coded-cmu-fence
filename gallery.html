@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMU Fence — Gallery</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <span class="fence-icon">🏚️</span>
+    <span>CMU Fence</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Feed</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+    <li><a href="queue.html">Queue</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="design.html">Designs</a></li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#">More ▾</a>
+      <div class="dropdown-menu">
+        <a href="calendar.html">📅 Calendar &amp; Schedule</a>
+        <a href="queue.html">📋 Painting Queue</a>
+        <a href="gallery.html">🖼️ Past Fences</a>
+        <a href="design.html">🎨 Fence Designs</a>
+        <a href="about.html">ℹ️ About The Fence</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">👤 CMU Student</div>
+</nav>
+
+<div class="container">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px">
+    <div>
+      <h1 class="page-title">🖼️ Past Fence Gallery</h1>
+      <p class="page-subtitle">A record of CMU's most iconic canvas</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="searchInput" placeholder="🔍 Search org or design..." style="width:220px" oninput="renderGallery()">
+      <select id="sortSelect" onchange="renderGallery()" style="width:160px">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Submit past fence -->
+  <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,#fff8f5,#fff)">
+    <div class="card-header">
+      <div class="card-title">📸 Submit a Past Fence</div>
+      <button class="btn btn-primary btn-sm" onclick="toggleSubmit()">+ Add Entry</button>
+    </div>
+    <div id="submitForm" style="display:none;margin-top:12px">
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Organization Name *</label>
+          <input type="text" id="galleryOrg" placeholder="e.g. Kiltie Band">
+        </div>
+        <div class="form-group">
+          <label>Date Painted *</label>
+          <input type="date" id="galleryDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Design Title / Theme *</label>
+        <input type="text" id="galleryDesign" placeholder="e.g. Spring Celebration">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="galleryDesc" placeholder="Tell us about this fence painting..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Display Emoji</label>
+        <input type="text" id="galleryEmoji" placeholder="🎨" maxlength="4" style="width:80px">
+      </div>
+      <div class="modal-footer" style="margin-top:0;justify-content:flex-start">
+        <button class="btn btn-primary" onclick="addGalleryEntry()">Submit Entry</button>
+        <button class="btn btn-secondary" onclick="toggleSubmit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-grid" id="galleryGrid"></div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="galleryModal">
+  <div class="modal" style="max-width:600px">
+    <div id="modalContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeGalleryModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  CMU Fence Tracker &mdash; Unofficial Student Platform &mdash; <a href="about.html">About The Fence</a>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => renderGallery());
+
+function renderGallery() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  let items = DB.get('gallery', []);
+  if (search) items = items.filter(g =>
+    g.org.toLowerCase().includes(search) ||
+    g.design.toLowerCase().includes(search) ||
+    (g.desc || '').toLowerCase().includes(search)
+  );
+  items = [...items].sort((a,b) => {
+    const cmp = a.date.localeCompare(b.date);
+    return sort === 'newest' ? -cmp : cmp;
+  });
+
+  const grid = document.getElementById('galleryGrid');
+  if (!items.length) {
+    grid.innerHTML = '<p style="color:#888;grid-column:1/-1">No results found.</p>';
+    return;
+  }
+
+  grid.innerHTML = items.map(g => `
+    <div class="gallery-card" onclick="openGalleryModal(${g.id})">
+      <div class="gallery-img" style="background:linear-gradient(135deg,${g.color || '#888'}33,${g.color || '#888'}66)">
+        <span style="font-size:4rem">${g.imageEmoji || '🎨'}</span>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-org">${g.org}</div>
+        <div class="gallery-date">${formatDate(g.date)}</div>
+        <div class="gallery-desc">${g.design}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+}
+
+function openGalleryModal(id) {
+  const items = DB.get('gallery', []);
+  const g = items.find(i => i.id === id);
+  if (!g) return;
+
+  document.getElementById('modalContent').innerHTML = `
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:5rem;background:linear-gradient(135deg,${g.color||'#888'}33,${g.color||'#888'}66);
+        border-radius:12px;padding:32px;margin-bottom:12px">${g.imageEmoji || '🎨'}</div>
+    </div>
+    <div class="modal-title">${g.org}</div>
+    <div style="font-size:0.85rem;color:#888;margin-bottom:10px">${formatDate(g.date)}</div>
+    <div style="font-weight:600;margin-bottom:8px">${g.design}</div>
+    ${g.desc ? `<div style="font-size:0.92rem;color:#555;line-height:1.6">${g.desc}</div>` : ''}
+  `;
+  document.getElementById('galleryModal').classList.add('open');
+}
+
+function closeGalleryModal() {
+  document.getElementById('galleryModal').classList.remove('open');
+}
+
+function toggleSubmit() {
+  const f = document.getElementById('submitForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function addGalleryEntry() {
+  const org = document.getElementById('galleryOrg').value.trim();
+  const date = document.getElementById('galleryDate').value;
+  const design = document.getElementById('galleryDesign').value.trim();
+  const desc = document.getElementById('galleryDesc').value.trim();
+  const emoji = document.getElementById('galleryEmoji').value.trim() || '🎨';
+
+  if (!org) { showToast('Please enter an organization name.'); return; }
+  if (!date) { showToast('Please select a date.'); return; }
+  if (!design) { showToast('Please enter a design title.'); return; }
+
+  const gallery = DB.get('gallery', []);
+  gallery.unshift({ id: Date.now(), org, date, design, desc, imageEmoji: emoji, color: '#c41230' });
+  DB.set('gallery', gallery);
+
+  showToast('Gallery entry added!');
+  ['galleryOrg','galleryDate','galleryDesign','galleryDesc','galleryEmoji'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('submitForm').style.display = 'none';
+  renderGallery();
+}
+</script>
+</body>
+</html>

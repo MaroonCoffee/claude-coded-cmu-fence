@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMU Fence — Home</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <span class="fence-icon">🏚️</span>
+    <span>CMU Fence</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Feed</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+    <li><a href="queue.html">Queue</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="design.html">Designs</a></li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#">More ▾</a>
+      <div class="dropdown-menu">
+        <a href="calendar.html">📅 Calendar &amp; Schedule</a>
+        <a href="queue.html">📋 Painting Queue</a>
+        <a href="gallery.html">🖼️ Past Fences</a>
+        <a href="design.html">🎨 Fence Designs</a>
+        <a href="about.html">ℹ️ About The Fence</a>
+      </div>
+    </li>
+  </ul>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">👤 CMU Student</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-content">
+    <h1>The CMU Fence</h1>
+    <p>Track upcoming fence paintings, express your interest, and stay connected with CMU's most iconic tradition since 1923.</p>
+    <div class="hero-actions">
+      <a href="queue.html" class="btn btn-primary">📋 Join the Queue</a>
+      <a href="calendar.html" class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.6)">📅 View Schedule</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="grid-2">
+    <div>
+      <h2 class="page-title">Upcoming Paintings</h2>
+      <p class="page-subtitle">Express your interest in attending</p>
+      <div id="feed"></div>
+    </div>
+    <div>
+      <div class="weather-widget" id="weatherWidget">
+        <div class="weather-title">Pittsburgh Weather</div>
+        <div style="margin-top:8px;opacity:0.7">Loading...</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔥 Most Popular This Week</div>
+        </div>
+        <div id="popular"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <div class="card-title">📜 The Fence Rules</div>
+        </div>
+        <ul style="padding-left:18px;line-height:2;font-size:0.88rem;color:#555">
+          <li>Must paint midnight – sunrise only</li>
+          <li>Brush painting only — no spray paint</li>
+          <li>Must fully cover the fence</li>
+          <li>2+ students must guard at all times</li>
+          <li>CMU-affiliated students only</li>
+        </ul>
+        <a href="about.html" class="btn btn-outline btn-sm" style="margin-top:12px">Learn More</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  CMU Fence Tracker &mdash; Unofficial Student Platform &mdash; <a href="about.html">About The Fence</a>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  loadWeather('weatherWidget');
+  renderFeed();
+  renderStats();
+});
+
+function renderStats() {
+  const events = DB.get('events', []);
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = events.filter(e => e.date >= today).length;
+  const totalGoing = events.reduce((s,e) => s + e.attendees.going.length, 0);
+  const orgs = new Set(events.map(e => e.org)).size;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-box"><div class="stat-num">${upcoming}</div><div class="stat-label">Upcoming Paintings</div></div>
+    <div class="stat-box"><div class="stat-num">${totalGoing}</div><div class="stat-label">Total RSVPs</div></div>
+    <div class="stat-box"><div class="stat-num">${orgs}</div><div class="stat-label">Orgs Participating</div></div>
+    <div class="stat-box"><div class="stat-num">100+</div><div class="stat-label">Years of Tradition</div></div>
+  `;
+}
+
+function renderFeed() {
+  const events = DB.get('events', []);
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date));
+
+  const feed = document.getElementById('feed');
+  if (!upcoming.length) {
+    feed.innerHTML = '<p style="color:#888">No upcoming events. <a href="queue.html">Join the queue!</a></p>';
+    return;
+  }
+
+  feed.innerHTML = upcoming.map(ev => {
+    const rsvp = getRsvp(ev.id);
+    const d = new Date(ev.date + 'T12:00:00');
+    const dateStr = d.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric'});
+    const goingCount = ev.attendees.going.length;
+    const maybeCount = ev.attendees.maybe.length;
+
+    return `<div class="event-card" id="event-${ev.id}">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:2rem">${ev.imageEmoji}</div>
+        <div>
+          <div class="event-org">${ev.org}</div>
+          <div class="event-date">📅 ${dateStr} &nbsp;•&nbsp; Midnight – Sunrise</div>
+        </div>
+      </div>
+      <div class="event-desc">${ev.design}</div>
+      <div class="event-meta">
+        <span>✅ ${goingCount} going</span>
+        <span>🤔 ${maybeCount} maybe</span>
+      </div>
+      <div class="rsvp-group">
+        <button class="rsvp-btn going ${rsvp==='going'?'active':''}" onclick="doRsvp(${ev.id},'going',this)">✅ Going</button>
+        <button class="rsvp-btn maybe ${rsvp==='maybe'?'active':''}" onclick="doRsvp(${ev.id},'maybe',this)">🤔 Maybe</button>
+        <button class="rsvp-btn notgoing ${rsvp==='notgoing'?'active':''}" onclick="doRsvp(${ev.id},'notgoing',this)">❌ Can't Go</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // popular
+  const sorted = [...events].sort((a,b) => b.attendees.going.length - a.attendees.going.length).slice(0,3);
+  document.getElementById('popular').innerHTML = sorted.map((ev,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0">
+      <div style="font-size:1.4rem;width:32px;text-align:center">${['🥇','🥈','🥉'][i]}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:0.92rem">${ev.org}</div>
+        <div style="font-size:0.8rem;color:#888">${ev.attendees.going.length} going</div>
+      </div>
+      <span class="badge badge-red">${ev.imageEmoji}</span>
+    </div>
+  `).join('');
+}
+
+function doRsvp(id, status, btn) {
+  const current = getRsvp(id);
+  const newStatus = current === status ? null : status;
+  setRsvp(id, newStatus);
+  showToast(newStatus ? `Marked as "${newStatus}" for this event!` : 'RSVP removed.');
+  renderFeed();
+}
+</script>
+</body>
+</html>

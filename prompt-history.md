@@ -15,10 +15,23 @@ Possible features:
 
 Don't try to put everything on one page, try to split it across multiple pages like a typically social media site
 
-# Prompt 1: 
+# Prompt 1:
 make the project described in CLAUDE.md
 
 # CLAUDE.MD Version 2:
 ...
 Log every prompt the user gives you in and also record changes to CLAUDE.md in prompt-history.md
+
+# Prompt 2:
+build the specified app in CLAUDE.md
+
+Response: Built a full multi-page HTML/CSS/JS website with the following pages:
+- index.html — Home/Feed with upcoming events, RSVP buttons, weather widget, stats
+- calendar.html — Monthly calendar with event markers, weather forecast overlay, upcoming list
+- queue.html — Queue registration form for orgs + table view with tabs
+- gallery.html — Past fence gallery with search, filter, and submit form
+- design.html — Fence design preview builder + upcoming designs list
+- about.html — Fence history, official rules, timeline
+- styles.css — Shared stylesheet
+- app.js — Shared JS (localStorage data, RSVP logic, weather API, seed data)
 
