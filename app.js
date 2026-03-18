@@ -15,7 +15,7 @@ function seedData() {
 
   const events = [
     { id: 1, org: 'Scottie Dog Fan Club', date: '2026-03-19', design: 'Scottie dogs wearing kilts celebrating spring!', attendees: { going: ['alice','bob','carol'], maybe: ['dave'], notgoing: [] }, imageEmoji: '🐾', color: '#e74c3c' },
-    { id: 2, org: 'CMU Drama Club', date: '2026-03-22', design: 'Shakespeare's "To paint or not to paint" — a dramatic tribute', attendees: { going: ['eve','frank'], maybe: ['grace','hank'], notgoing: ['ivan'] }, imageEmoji: '🎭', color: '#8e44ad' },
+    { id: 2, org: 'CMU Drama Club', date: '2026-03-22', design: 'Shakespeare\'s "To paint or not to paint" \u2014 a dramatic tribute', attendees: { going: ['eve','frank'], maybe: ['grace','hank'], notgoing: ['ivan'] }, imageEmoji: '🎭', color: '#8e44ad' },
     { id: 3, org: 'Robotics Club', date: '2026-03-25', design: 'Our FIRST Robotics championship qualifier robot!', attendees: { going: ['judy','ken','linda','mike'], maybe: [], notgoing: [] }, imageEmoji: '🤖', color: '#2980b9' },
     { id: 4, org: 'CS Club @ CMU', date: '2026-03-28', design: '"Hello World" — celebrating 50 years of CS at CMU', attendees: { going: ['nina'], maybe: ['omar','pam'], notgoing: [] }, imageEmoji: '💻', color: '#27ae60' },
     { id: 5, org: 'Bhangra Club', date: '2026-04-02', design: 'Vibrant Bhangra dancers with spring colors!', attendees: { going: [], maybe: ['quinn'], notgoing: [] }, imageEmoji: '💃', color: '#f39c12' },
