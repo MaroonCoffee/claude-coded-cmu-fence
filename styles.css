@@ -571,3 +571,71 @@ footer {
 }
 
 footer a { color: var(--cmu-red); text-decoration: none; }
+
+/* ATTENDEE LIST */
+.attendee-toggle {
+  margin-top: 10px;
+}
+
+.btn-attendees {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-attendees:hover {
+  border-color: var(--cmu-red);
+  color: var(--cmu-red);
+  background: #fff5f5;
+}
+
+.attendee-list-panel {
+  margin-top: 10px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px 14px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.attendee-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.attendee-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.88rem;
+}
+.attendee-list li:last-child { border-bottom: none; }
+
+.attendee-name {
+  font-weight: 600;
+  color: var(--cmu-dark);
+}
+
+.attendee-email {
+  color: #aaa;
+  font-size: 0.78rem;
+}
+
+.no-attendees {
+  color: #aaa;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin: 0;
+}

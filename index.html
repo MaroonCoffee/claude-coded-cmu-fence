@@ -88,9 +88,6 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
 <script src="app.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -145,6 +142,12 @@ function renderFeed(events) {
       <div class="event-meta">
         <span>✅ ${goingCount} going</span>
         <span>🤔 ${maybeCount} maybe</span>
+      </div>
+      <div class="attendee-toggle">
+        <button class="btn-attendees" id="attendees-btn-${ev.id}" onclick="toggleAttendeeList(${ev.id})">▾ See who's going</button>
+        <div id="attendees-${ev.id}" class="attendee-list-panel" style="display:none">
+          ${buildAttendeeListHTML(ev)}
+        </div>
       </div>
       <div class="rsvp-group">
         <button class="rsvp-btn going ${rsvp==='going'?'active':''}" onclick="doRsvp(${ev.id},'going',this)">✅ Going</button>

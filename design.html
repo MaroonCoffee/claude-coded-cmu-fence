@@ -6,34 +6,234 @@
   <title>CMU Fence — Designs</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    .design-preview {
+    /* === FENCE STRUCTURE === */
+    .fence-scene {
       width: 100%;
-      aspect-ratio: 4/1;
-      border-radius: 14px;
+      border-radius: 10px;
+      overflow: visible;
+    }
+
+    .fence-rail {
+      height: 18px;
+      background: linear-gradient(180deg, #9B6B40 0%, #5a3618 100%);
+      border-radius: 4px;
+      position: relative;
+      z-index: 4;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    }
+
+    .fence-body {
+      display: flex;
+      position: relative;
+      height: 190px;
+    }
+
+    .fence-segment {
+      cursor: pointer;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
       overflow: hidden;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transition: filter 0.12s;
     }
-    .fence-boards {
-      position: absolute;
-      inset: 0;
-      display: flex;
-    }
-    .fence-board {
-      flex: 1;
-      border-right: 2px solid rgba(0,0,0,0.12);
-      position: relative;
-    }
-    .design-overlay-text {
-      position: relative;
+
+    .fence-post {
+      width: 54px;
+      flex-shrink: 0;
       z-index: 2;
-      text-align: center;
-      padding: 20px;
+      /* Posts extend slightly above/below to poke through rails */
+      margin-top: -18px;
+      margin-bottom: -18px;
     }
+
+    .fence-length {
+      flex: 1;
+      z-index: 1;
+    }
+
+    .fence-segment:hover { filter: brightness(1.14); }
+
+    .fence-segment.selected {
+      outline: 3px solid #ffee00;
+      outline-offset: -3px;
+      z-index: 5;
+      filter: brightness(1.08);
+    }
+
+    .seg-text {
+      position: relative;
+      z-index: 6;
+      text-align: center;
+      font-weight: 700;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.65);
+      pointer-events: none;
+      line-height: 1.2;
+    }
+
+    .fence-post .seg-text {
+      font-size: 0.78rem;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      max-height: 160px;
+      padding: 4px 0;
+      overflow: hidden;
+    }
+
+    .fence-length .seg-text {
+      font-size: 1rem;
+      padding: 0 8px;
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .fence-ground {
+      height: 24px;
+      background: linear-gradient(180deg, #6aaa42 0%, #3d6b28 100%);
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* Segment index labels on hover */
+    .fence-segment::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.55);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 7;
+    }
+
+    /* Image overlays for spanning photos */
+    .img-overlay {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* === EDITOR PANEL === */
+    .seg-editor {
+      margin-top: 14px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 10px;
+      border: 2px solid var(--cmu-red);
+      min-height: 60px;
+    }
+
+    .seg-editor-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--cmu-dark);
+      margin-bottom: 12px;
+    }
+
+    .editor-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: flex-end;
+    }
+
+    .editor-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .editor-field label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .editor-field input[type="text"] {
+      padding: 6px 10px;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      min-width: 150px;
+    }
+
+    .editor-field input[type="number"] {
+      width: 64px;
+      padding: 6px 10px;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .editor-field input[type="color"] {
+      width: 42px;
+      height: 34px;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 1px 2px;
+    }
+
+    .mini-swatches {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mini-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.12s;
+    }
+    .mini-swatch:hover { transform: scale(1.25); }
+    .mini-swatch.sel { outline: 2.5px solid #333; outline-offset: 1px; }
+
+    .img-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: #f5f5f5;
+      border: 1.5px dashed #bbb;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: #555;
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+    .img-upload-btn:hover { background: #e8e8e8; }
+
+    .img-thumb {
+      width: 48px;
+      height: 34px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    .no-sel-hint {
+      color: #bbb;
+      font-size: 0.88rem;
+      padding: 6px 0;
+    }
+
+    /* === MINI FENCE CARDS === */
     .design-mini-card {
       background: white;
       border-radius: 10px;
@@ -44,25 +244,42 @@
       transition: transform 0.2s;
     }
     .design-mini-card:hover { transform: translateY(-2px); }
-    .design-mini-preview {
-      aspect-ratio: 4/1;
+    .design-mini-fence {
+      display: flex;
+      height: 56px;
+      width: 100%;
+    }
+    .design-mini-post {
+      width: 18px;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
+      overflow: hidden;
     }
-    .design-mini-info { padding: 12px; }
-    .color-swatch {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-      cursor: pointer;
-      transition: transform 0.15s;
+    .design-mini-length {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
-    .color-swatch:hover { transform: scale(1.15); }
-    .color-swatch.selected { outline: 3px solid var(--cmu-dark); }
+    .design-mini-text {
+      font-size: 0.5rem;
+      font-weight: 700;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      padding: 0 2px;
+    }
+    .design-mini-post .design-mini-text {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      padding: 2px 0;
+      max-height: 50px;
+    }
+    .design-mini-info { padding: 10px 12px; }
   </style>
 </head>
 <body>
@@ -95,92 +312,66 @@
 
 <div class="container">
   <h1 class="page-title">🎨 Fence Designs</h1>
-  <p class="page-subtitle">Preview planned designs + submit your own concept</p>
+  <p class="page-subtitle">Design your fence painting — click any post or section to edit it</p>
+
+  <!-- Full-width fence builder -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header">
+      <div class="card-title">🖌️ Fence Design Builder</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="clearAll()">🗑️ Clear All</button>
+      </div>
+    </div>
+    <p style="font-size:0.83rem;color:#888;margin-bottom:14px">
+      The fence has <strong>6 posts</strong> (narrow, for letters/labels) and <strong>5 sections</strong> (wide, for words or images).
+      Click any part to edit. Images can span multiple posts and sections.
+    </p>
+
+    <!-- Fence visualization -->
+    <div class="fence-scene">
+      <div class="fence-rail"></div>
+      <div class="fence-body" id="fenceBody"><!-- built by JS --></div>
+      <div class="fence-rail"></div>
+      <div class="fence-ground"></div>
+    </div>
+
+    <!-- Segment editor (shown on selection) -->
+    <div class="seg-editor" id="segEditor">
+      <div class="no-sel-hint">👆 Click a post or section above to edit it</div>
+    </div>
+  </div>
 
   <div class="grid-2">
-    <!-- Left: upcoming designs -->
+    <!-- Save form -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">💾 Save This Design</div>
+      <div class="form-group">
+        <label>Organization / Club Name *</label>
+        <input type="text" id="designOrg" placeholder="e.g. CMU Drama Club">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="designDesc" placeholder="Describe your concept..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="saveDesign()" style="width:100%">💾 Save Design</button>
+    </div>
+
+    <!-- Upcoming designs + detail -->
     <div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-title" style="margin-bottom:14px">🖌️ Upcoming Designs</div>
         <div id="upcomingDesigns"></div>
       </div>
 
-      <!-- Design detail view -->
       <div id="designDetail" style="display:none">
         <div class="card">
           <div class="card-header">
             <div class="card-title" id="designDetailTitle"></div>
             <button class="btn btn-secondary btn-sm" onclick="document.getElementById('designDetail').style.display='none'">✕</button>
           </div>
-          <div id="designDetailPreview" class="design-preview"></div>
+          <div id="designDetailPreview"></div>
           <div id="designDetailInfo"></div>
           <div class="rsvp-group" id="designDetailRsvp"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: design builder -->
-    <div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:16px">🖼️ Design Preview Builder</div>
-        <p style="font-size:0.87rem;color:#888;margin-bottom:16px">
-          Visualize your fence concept. This preview represents the fence's flat painted surface.
-        </p>
-
-        <!-- Live preview -->
-        <div id="livePreview" class="design-preview" style="background:#c8956a">
-          <div class="fence-boards" id="fenceBoards"></div>
-          <div class="design-overlay-text" id="previewText">
-            <div id="previewEmoji" style="font-size:3rem"></div>
-            <div id="previewTitle" style="color:white;font-size:1.4rem;font-weight:800;text-shadow:2px 2px 8px rgba(0,0,0,0.6)"></div>
-            <div id="previewSubtitle" style="color:rgba(255,255,255,0.85);font-size:0.9rem;margin-top:4px;text-shadow:1px 1px 4px rgba(0,0,0,0.5)"></div>
-          </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="form-group">
-          <label>Main Message / Title</label>
-          <input type="text" id="designTitle" placeholder="e.g. Go Tartans! 🏴󠁧󠁢󠁳󠁣󠁴󠁿" oninput="updatePreview()">
-        </div>
-
-        <div class="form-group">
-          <label>Subtitle / Secondary Text</label>
-          <input type="text" id="designSub" placeholder="e.g. CS Club @ CMU • Spring 2026" oninput="updatePreview()">
-        </div>
-
-        <div class="form-group">
-          <label>Main Emoji / Icon</label>
-          <input type="text" id="designEmoji" placeholder="🎓" maxlength="4" oninput="updatePreview()" style="width:80px">
-        </div>
-
-        <div class="form-group">
-          <label>Background Color</label>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
-            <div class="color-swatch selected" style="background:#c8956a" onclick="setColor('#c8956a',this)" title="Wood"></div>
-            <div class="color-swatch" style="background:#c41230" onclick="setColor('#c41230',this)" title="CMU Red"></div>
-            <div class="color-swatch" style="background:#1a1a2e" onclick="setColor('#1a1a2e',this)" title="Dark"></div>
-            <div class="color-swatch" style="background:#2980b9" onclick="setColor('#2980b9',this)" title="Blue"></div>
-            <div class="color-swatch" style="background:#27ae60" onclick="setColor('#27ae60',this)" title="Green"></div>
-            <div class="color-swatch" style="background:#8e44ad" onclick="setColor('#8e44ad',this)" title="Purple"></div>
-            <div class="color-swatch" style="background:#f39c12" onclick="setColor('#f39c12',this)" title="Gold"></div>
-            <div class="color-swatch" style="background:#e74c3c" onclick="setColor('#e74c3c',this)" title="Bright Red"></div>
-            <div class="color-swatch" style="background:#2c3e50" onclick="setColor('#2c3e50',this)" title="Navy"></div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Organization (for saving)</label>
-          <input type="text" id="designOrg" placeholder="Your club/org name">
-        </div>
-
-        <div class="form-group">
-          <label>Description</label>
-          <textarea id="designDesc" placeholder="Describe your design concept in more detail..."></textarea>
-        </div>
-
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-primary" onclick="saveDesign()" style="flex:1">💾 Save Design</button>
-          <button class="btn btn-secondary" onclick="clearDesign()">Clear</button>
         </div>
       </div>
     </div>
@@ -193,75 +384,296 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
 <script src="app.js"></script>
 <script>
-let currentBg = '#c8956a';
+// ── Constants ──────────────────────────────────────────────────────────────
+const N = 11; // 6 posts + 5 sections (post=even index, section=odd index)
+const PALETTE = [
+  '#c8956a','#c41230','#1a1a2e','#2980b9','#27ae60',
+  '#8e44ad','#f39c12','#e74c3c','#2c3e50','#ffffff',
+  '#000000','#f5f5f5'
+];
 
+function isPost(i) { return i % 2 === 0; }
+
+function defaultSeg(i) {
+  return {
+    bgColor: isPost(i) ? '#7a4f2a' : '#c8956a',
+    text: '',
+    textColor: '#ffffff',
+    image: null,
+    imageSpan: 1,
+  };
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+let segments = Array.from({length: N}, (_, i) => defaultSeg(i));
+let selectedIdx = null;
+
+// ── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  renderFenceBoards();
-  renderUpcomingDesigns();
+  buildFenceDOM();
+  renderFence();
+  DB.listen('events', evs => renderUpcomingDesigns(evs || []));
 });
 
-function renderFenceBoards() {
-  const boards = document.getElementById('fenceBoards');
-  boards.innerHTML = '';
-  for (let i = 0; i < 12; i++) {
-    const b = document.createElement('div');
-    b.className = 'fence-board';
-    boards.appendChild(b);
+function buildFenceDOM() {
+  const body = document.getElementById('fenceBody');
+  body.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const div = document.createElement('div');
+    const post = isPost(i);
+    div.className = 'fence-segment ' + (post ? 'fence-post' : 'fence-length');
+    div.dataset.idx = i;
+    div.dataset.label = post
+      ? 'P' + (Math.floor(i / 2) + 1)
+      : 'S' + (Math.floor(i / 2) + 1);
+    div.onclick = () => selectSegment(i);
+
+    const span = document.createElement('span');
+    span.className = 'seg-text';
+    div.appendChild(span);
+    body.appendChild(div);
   }
 }
 
-function updatePreview() {
-  const title = document.getElementById('designTitle').value;
-  const sub = document.getElementById('designSub').value;
-  const emoji = document.getElementById('designEmoji').value;
-  document.getElementById('previewTitle').textContent = title;
-  document.getElementById('previewSubtitle').textContent = sub;
-  document.getElementById('previewEmoji').textContent = emoji;
+// ── Rendering ──────────────────────────────────────────────────────────────
+function renderFence() {
+  const body = document.getElementById('fenceBody');
+  body.querySelectorAll('.img-overlay').forEach(el => el.remove());
+
+  const els = body.querySelectorAll('.fence-segment');
+
+  // Which segments are covered by a spanning image from a prior segment?
+  const covered = buildCoverageSet();
+
+  segments.forEach((seg, i) => {
+    const el = els[i];
+    el.style.backgroundColor = covered.has(i) ? 'transparent' : seg.bgColor;
+
+    const textEl = el.querySelector('.seg-text');
+    textEl.textContent = covered.has(i) ? '' : seg.text;
+    textEl.style.color = seg.textColor;
+
+    el.classList.toggle('selected', i === selectedIdx);
+  });
+
+  // Place image overlays after layout is done
+  requestAnimationFrame(placeImageOverlays);
 }
 
-function setColor(color, el) {
-  currentBg = color;
-  document.getElementById('livePreview').style.background = color;
-  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-  el.classList.add('selected');
+function buildCoverageSet() {
+  const covered = new Set();
+  segments.forEach((seg, i) => {
+    if (seg.image && seg.imageSpan > 1) {
+      const end = Math.min(i + seg.imageSpan, N);
+      for (let j = i + 1; j < end; j++) covered.add(j);
+    }
+  });
+  return covered;
 }
 
+function placeImageOverlays() {
+  const body = document.getElementById('fenceBody');
+  body.querySelectorAll('.img-overlay').forEach(el => el.remove());
+
+  const els = body.querySelectorAll('.fence-segment');
+  const bodyRect = body.getBoundingClientRect();
+  if (!bodyRect.width) return;
+
+  segments.forEach((seg, i) => {
+    if (!seg.image) return;
+    const span = Math.min(seg.imageSpan, N - i);
+    const startRect = els[i].getBoundingClientRect();
+    const endRect   = els[i + span - 1].getBoundingClientRect();
+
+    const left  = startRect.left - bodyRect.left;
+    const width = endRect.right - startRect.left;
+
+    const ov = document.createElement('div');
+    ov.className = 'img-overlay';
+    ov.style.left  = left + 'px';
+    ov.style.width = width + 'px';
+    ov.style.backgroundImage = `url(${seg.image})`;
+    body.appendChild(ov);
+  });
+}
+
+// ── Selection & Editing ────────────────────────────────────────────────────
+function selectSegment(idx) {
+  selectedIdx = idx;
+  renderFence();
+  renderEditor();
+}
+
+function renderEditor() {
+  const editor = document.getElementById('segEditor');
+  if (selectedIdx === null) {
+    editor.innerHTML = '<div class="no-sel-hint">👆 Click a post or section above to edit it</div>';
+    return;
+  }
+
+  const seg = segments[selectedIdx];
+  const post = isPost(selectedIdx);
+  const num  = Math.floor(selectedIdx / 2) + 1;
+  const label = post ? `Post ${num} of 6` : `Section ${num} of 5`;
+  const placeholder = post ? 'e.g. A single letter...' : 'e.g. Go Tartans! 🏴󠁧󠁢󠁳󠁣󠁴󠁿';
+  const maxlen = post ? '8' : '60';
+
+  const swatches = PALETTE.map(c =>
+    `<div class="mini-swatch${seg.bgColor===c?' sel':''}" style="background:${c}"
+          onclick="setSegBg('${c}',this)" title="${c}"></div>`
+  ).join('');
+
+  const imgSection = seg.image
+    ? `<div class="editor-field">
+         <label>Image</label>
+         <div style="display:flex;align-items:center;gap:8px">
+           <img class="img-thumb" src="${seg.image}" alt="">
+           <label class="img-upload-btn">📷 Replace<input type="file" accept="image/*" style="display:none" onchange="uploadSegImage(this)"></label>
+           <button class="btn btn-secondary btn-sm" onclick="clearSegImage()">✕</button>
+         </div>
+       </div>
+       <div class="editor-field">
+         <label>Image spans (segments)</label>
+         <input type="number" id="segSpan" value="${seg.imageSpan}" min="1" max="${N - selectedIdx}"
+                oninput="setSegSpan(+this.value)">
+         <span style="font-size:0.72rem;color:#aaa;margin-top:2px">covers ${seg.imageSpan} segment${seg.imageSpan>1?'s':''}</span>
+       </div>`
+    : `<div class="editor-field">
+         <label>Image (optional)</label>
+         <label class="img-upload-btn">📷 Upload photo<input type="file" accept="image/*" style="display:none" onchange="uploadSegImage(this)"></label>
+       </div>`;
+
+  editor.innerHTML = `
+    <div class="seg-editor-title">✏️ Editing: ${label}</div>
+    <div class="editor-row">
+      <div class="editor-field">
+        <label>${post ? 'Letter / Label' : 'Text / Words'}</label>
+        <input type="text" id="segText" value="${escHtml(seg.text)}"
+               placeholder="${placeholder}" maxlength="${maxlen}"
+               oninput="setSegText(this.value)">
+      </div>
+      <div class="editor-field">
+        <label>Text Color</label>
+        <input type="color" value="${seg.textColor}" oninput="setSegTextColor(this.value)">
+      </div>
+      <div class="editor-field" style="flex:1">
+        <label>Paint Color</label>
+        <div class="mini-swatches">
+          ${swatches}
+          <input type="color" value="${seg.bgColor}" title="Custom"
+                 oninput="setSegBg(this.value,null)"
+                 style="width:22px;height:22px;border-radius:50%;padding:0;border:2px solid #ccc;cursor:pointer">
+        </div>
+      </div>
+      ${imgSection}
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-secondary btn-sm" onclick="clearSegment()">🗑️ Clear this segment</button>
+    </div>
+  `;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Segment updaters ───────────────────────────────────────────────────────
+function setSegText(v)      { segments[selectedIdx].text = v; renderFence(); }
+function setSegTextColor(v) { segments[selectedIdx].textColor = v; renderFence(); }
+
+function setSegBg(color, el) {
+  segments[selectedIdx].bgColor = color;
+  document.querySelectorAll('.mini-swatch').forEach(s =>
+    s.classList.toggle('sel', s.style.background === color)
+  );
+  renderFence();
+}
+
+function setSegSpan(v) {
+  if (!isNaN(v) && v >= 1) {
+    segments[selectedIdx].imageSpan = Math.min(v, N - selectedIdx);
+    renderFence();
+  }
+}
+
+function uploadSegImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    segments[selectedIdx].image = e.target.result;
+    segments[selectedIdx].imageSpan = 1;
+    renderFence();
+    renderEditor();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearSegImage() {
+  segments[selectedIdx].image = null;
+  segments[selectedIdx].imageSpan = 1;
+  renderFence();
+  renderEditor();
+}
+
+function clearSegment() {
+  segments[selectedIdx] = defaultSeg(selectedIdx);
+  renderFence();
+  renderEditor();
+}
+
+function clearAll() {
+  if (!confirm('Clear the entire fence design?')) return;
+  segments = Array.from({length: N}, (_, i) => defaultSeg(i));
+  selectedIdx = null;
+  renderFence();
+  renderEditor();
+}
+
+// ── Save ───────────────────────────────────────────────────────────────────
 function saveDesign() {
-  const title = document.getElementById('designTitle').value.trim();
-  const org = document.getElementById('designOrg').value.trim();
+  const org  = document.getElementById('designOrg').value.trim();
   const desc = document.getElementById('designDesc').value.trim();
-  const emoji = document.getElementById('designEmoji').value.trim() || '🎨';
-  const sub = document.getElementById('designSub').value.trim();
-
-  if (!title) { showToast('Please enter a main message/title.'); return; }
+  if (!org) { showToast('Please enter an organization name.'); return; }
 
   const designs = DB.get('savedDesigns', []);
   designs.unshift({
     id: Date.now(),
-    title, org, desc, emoji, sub, color: currentBg,
+    org, desc,
+    segments: JSON.parse(JSON.stringify(segments)),
     savedAt: new Date().toISOString().slice(0,10)
   });
   DB.set('savedDesigns', designs);
   showToast('Design saved!');
-  renderUpcomingDesigns();
+  renderUpcomingDesigns(DB.get('events', []));
 }
 
-function clearDesign() {
-  ['designTitle','designSub','designEmoji','designOrg','designDesc'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  updatePreview();
+// ── Mini fence renderer (for cards) ───────────────────────────────────────
+function renderMiniFence(segs) {
+  const parts = segs.map((seg, i) => {
+    const post = i % 2 === 0;
+    const bgImg = seg.image
+      ? `background-image:url(${seg.image});background-size:cover;background-position:center;`
+      : '';
+    const cls = post ? 'design-mini-post' : 'design-mini-length';
+    const textStyle = `color:${seg.textColor};text-shadow:0 1px 2px rgba(0,0,0,0.6);`;
+    return `<div class="${cls}" style="background:${seg.bgColor};${bgImg}">
+      <span class="design-mini-text" style="${textStyle}">${escHtml(seg.text)}</span>
+    </div>`;
+  }).join('');
+  return `<div class="design-mini-fence">${parts}</div>`;
 }
 
-function renderUpcomingDesigns() {
-  const events = DB.get('events', []);
+// ── Upcoming designs list ──────────────────────────────────────────────────
+function renderUpcomingDesigns(events) {
   const today = new Date().toISOString().slice(0,10);
-  const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date));
+  const upcoming = (events || [])
+    .filter(e => e.date >= today)
+    .sort((a,b) => a.date.localeCompare(b.date));
   const savedDesigns = DB.get('savedDesigns', []);
 
   let html = '';
@@ -271,14 +683,17 @@ function renderUpcomingDesigns() {
     html += upcoming.map(ev => {
       const d = new Date(ev.date + 'T12:00:00');
       const dateStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      // Generate a preview fence from event colour
+      const previewSegs = Array.from({length: N}, (_, i) => defaultSeg(i));
+      // Paint the middle section with org color + name
+      previewSegs[5].bgColor = ev.color || '#c41230';
+      previewSegs[5].text = ev.org;
       return `<div class="design-mini-card" onclick="showDesignDetail(${ev.id})">
-        <div class="design-mini-preview" style="background:linear-gradient(135deg,${ev.color || '#c41230'}aa,${ev.color || '#c41230'}55)">
-          ${ev.imageEmoji}
-        </div>
+        ${renderMiniFence(previewSegs)}
         <div class="design-mini-info">
-          <div style="font-weight:600">${ev.org}</div>
+          <div style="font-weight:600">${escHtml(ev.org)}</div>
           <div style="font-size:0.82rem;color:#888">${dateStr} &nbsp;•&nbsp; ${ev.attendees.going.length} going</div>
-          <div style="font-size:0.85rem;color:#555;margin-top:4px">${ev.design}</div>
+          <div style="font-size:0.82rem;color:#555;margin-top:2px">${escHtml(ev.design)}</div>
         </div>
       </div>`;
     }).join('');
@@ -288,25 +703,24 @@ function renderUpcomingDesigns() {
     html += `<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;color:#aaa;letter-spacing:0.05em;margin:16px 0 8px">Saved Concepts</div>`;
     html += savedDesigns.map(d => `
       <div class="design-mini-card">
-        <div class="design-mini-preview" style="background:${d.color || '#888'}">
-          <span>${d.emoji}</span>
-        </div>
+        ${renderMiniFence(d.segments)}
         <div class="design-mini-info">
-          <div style="font-weight:600">${d.title}</div>
-          ${d.org ? `<div style="font-size:0.82rem;color:#888">${d.org}</div>` : ''}
-          ${d.desc ? `<div style="font-size:0.85rem;color:#555;margin-top:4px">${d.desc}</div>` : ''}
+          <div style="font-weight:600">${escHtml(d.org)}</div>
+          ${d.desc ? `<div style="font-size:0.82rem;color:#555;margin-top:2px">${escHtml(d.desc)}</div>` : ''}
+          <div style="font-size:0.75rem;color:#bbb;margin-top:4px">Saved ${d.savedAt}</div>
         </div>
       </div>
     `).join('');
   }
 
   if (!html) {
-    html = '<p style="color:#888;font-size:0.9rem">No designs yet. Create one using the builder!</p>';
+    html = '<p style="color:#888;font-size:0.9rem">No designs yet — create one using the builder above!</p>';
   }
 
   document.getElementById('upcomingDesigns').innerHTML = html;
 }
 
+// ── Detail view (from queue events) ───────────────────────────────────────
 function showDesignDetail(id) {
   const events = DB.get('events', []);
   const ev = events.find(e => e.id === id);
@@ -318,20 +732,33 @@ function showDesignDetail(id) {
 
   document.getElementById('designDetailTitle').textContent = `${ev.imageEmoji} ${ev.org}`;
 
+  // Build a fence preview that shows the org name across the middle sections
+  const previewSegs = Array.from({length: N}, (_, i) => defaultSeg(i));
+  previewSegs[3].bgColor = ev.color || '#c41230';
+  previewSegs[3].text    = ev.org;
+  previewSegs[5].bgColor = ev.color || '#c41230';
+  previewSegs[5].text    = ev.design.length > 28 ? ev.design.slice(0, 28) + '…' : ev.design;
+  previewSegs[7].bgColor = ev.color || '#c41230';
+  previewSegs[7].text    = ev.imageEmoji || '';
+
   document.getElementById('designDetailPreview').innerHTML = `
-    <div class="fence-boards">${Array.from({length:12}).map(() => '<div class="fence-board"></div>').join('')}</div>
-    <div class="design-overlay-text">
-      <div style="font-size:3rem">${ev.imageEmoji}</div>
-      <div style="color:white;font-size:1.3rem;font-weight:800;text-shadow:2px 2px 8px rgba(0,0,0,0.6)">${ev.org}</div>
-      <div style="color:rgba(255,255,255,0.85);font-size:0.85rem;text-shadow:1px 1px 4px rgba(0,0,0,0.5)">${ev.design}</div>
-    </div>
-  `;
-  document.getElementById('designDetailPreview').style.background = ev.color || '#c8956a';
+    <div style="border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);margin-bottom:14px">
+      <div style="height:10px;background:linear-gradient(180deg,#9B6B40,#5a3618)"></div>
+      ${renderMiniFence(previewSegs)}
+      <div style="height:10px;background:linear-gradient(180deg,#9B6B40,#5a3618)"></div>
+      <div style="height:14px;background:linear-gradient(180deg,#6aaa42,#3d6b28)"></div>
+    </div>`;
 
   document.getElementById('designDetailInfo').innerHTML = `
     <div style="font-size:0.88rem;color:#666;margin-bottom:10px">📅 ${dateStr} &nbsp;•&nbsp; Midnight–Sunrise</div>
-    <div style="font-size:0.92rem;color:#444">${ev.design}</div>
+    <div style="font-size:0.92rem;color:#444">${escHtml(ev.design)}</div>
     <div style="font-size:0.85rem;color:#888;margin-top:8px">✅ ${ev.attendees.going.length} going &nbsp; 🤔 ${ev.attendees.maybe.length} maybe</div>
+    <div class="attendee-toggle" style="margin-top:10px">
+      <button class="btn-attendees" id="attendees-btn-${id}" onclick="toggleAttendeeList(${id})">▾ See who's going</button>
+      <div id="attendees-${id}" class="attendee-list-panel" style="display:none">
+        ${buildAttendeeListHTML(ev)}
+      </div>
+    </div>
   `;
 
   document.getElementById('designDetailRsvp').innerHTML = `
@@ -341,6 +768,7 @@ function showDesignDetail(id) {
   `;
 
   document.getElementById('designDetail').style.display = 'block';
+  document.getElementById('designDetail').scrollIntoView({behavior:'smooth'});
 }
 
 function designRsvp(id, status) {
