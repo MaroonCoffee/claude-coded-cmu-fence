@@ -1,17 +1,49 @@
 // ===== CMU FENCE APP - shared JS =====
 
-// ---- Data Store (localStorage) ----
+// ---- Firebase-backed DB ----
+// _fbCache holds the latest snapshot from Firebase so DB.get() is synchronous
+const _fbCache = {};
+
 const DB = {
+  _ref(key) {
+    return firebase.database().ref('cmufence/' + key);
+  },
+
+  // Synchronous read from local cache (populated by listeners)
   get(key, def = []) {
+    const v = _fbCache[key];
+    return v !== undefined ? v : def;
+  },
+
+  // Write to Firebase and update local cache immediately
+  async set(key, val) {
+    _fbCache[key] = val;
+    return this._ref(key).set(val);
+  },
+
+  // Real-time listener — callback fires immediately on load + on every change from any device
+  listen(key, callback) {
+    this._ref(key).on('value', snap => {
+      const val = snap.val();
+      _fbCache[key] = val !== null ? val : undefined;
+      callback(_fbCache[key]);
+    });
+  }
+};
+
+// Personal RSVP state stays in localStorage (per-user, not shared)
+const LocalDB = {
+  get(key, def = null) {
     try { return JSON.parse(localStorage.getItem('cmufence_' + key)) ?? def; }
     catch { return def; }
   },
-  set(key, val) { localStorage.setItem('cmufence_' + key, JSON.stringify(val)); },
+  set(key, val) { localStorage.setItem('cmufence_' + key, JSON.stringify(val)); }
 };
 
-// Seed data if empty
-function seedData() {
-  if (DB.get('seeded', false)) return;
+// ---- Seed data (writes to Firebase once, then never again) ----
+async function seedData() {
+  const snap = await firebase.database().ref('cmufence/seeded').once('value');
+  if (snap.val()) return;
 
   const events = [
     { id: 1, org: 'Scottie Dog Fan Club', date: '2026-03-19', design: 'Scottie dogs wearing kilts celebrating spring!', attendees: { going: ['alice','bob','carol'], maybe: ['dave'], notgoing: [] }, imageEmoji: '🐾', color: '#e74c3c' },
@@ -30,19 +62,19 @@ function seedData() {
     { id: 6, org: 'Habitat for Humanity', date: '2025-11-01', design: 'Build-a-Thon Fundraiser', desc: 'Promoting the annual Build-a-Thon to raise money for local housing projects.', imageEmoji: '🏠', color: '#2475b0' },
   ];
 
-  DB.set('events', events);
-  DB.set('gallery', gallery);
-  DB.set('seeded', true);
+  await DB.set('events', events);
+  await DB.set('gallery', gallery);
+  await firebase.database().ref('cmufence/seeded').set(true);
 }
 
-seedData();
+seedData().catch(console.error);
 
 // ---- RSVP ----
 function getRsvp(eventId) {
-  return DB.get('rsvp_' + eventId, null);
+  return LocalDB.get('rsvp_' + eventId, null);
 }
 
-function setRsvp(eventId, status) {
+async function setRsvp(eventId, status) {
   const events = DB.get('events', []);
   const ev = events.find(e => e.id === eventId);
   if (!ev) return;
@@ -51,8 +83,8 @@ function setRsvp(eventId, status) {
     ev.attendees[s] = ev.attendees[s].filter(u => u !== user);
   });
   if (status) ev.attendees[status].push(user);
-  DB.set('events', events);
-  DB.set('rsvp_' + eventId, status);
+  LocalDB.set('rsvp_' + eventId, status);
+  await DB.set('events', events);
 }
 
 function countAttendees(ev) {
@@ -89,7 +121,6 @@ async function loadWeather(containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  // Pittsburgh lat/lon
   const lat = 40.4406, lon = -79.9959;
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,precipitation_probability&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FNew_York`;
 

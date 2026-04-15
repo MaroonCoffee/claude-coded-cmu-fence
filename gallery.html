@@ -104,9 +104,14 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="app.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => renderGallery());
+document.addEventListener('DOMContentLoaded', () => {
+  DB.listen('gallery', () => renderGallery());
+});
 
 function renderGallery() {
   const search = document.getElementById('searchInput').value.toLowerCase();
@@ -175,7 +180,7 @@ function toggleSubmit() {
   f.style.display = f.style.display === 'none' ? 'block' : 'none';
 }
 
-function addGalleryEntry() {
+async function addGalleryEntry() {
   const org = document.getElementById('galleryOrg').value.trim();
   const date = document.getElementById('galleryDate').value;
   const design = document.getElementById('galleryDesign').value.trim();
@@ -188,14 +193,14 @@ function addGalleryEntry() {
 
   const gallery = DB.get('gallery', []);
   gallery.unshift({ id: Date.now(), org, date, design, desc, imageEmoji: emoji, color: '#c41230' });
-  DB.set('gallery', gallery);
+  await DB.set('gallery', gallery);
 
   showToast('Gallery entry added!');
   ['galleryOrg','galleryDate','galleryDesign','galleryDesc','galleryEmoji'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('submitForm').style.display = 'none';
-  renderGallery();
+  // listener auto re-renders
 }
 </script>
 </body>

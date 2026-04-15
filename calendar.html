@@ -107,6 +107,9 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="app.js"></script>
 <script>
 let currentDate = new Date();
@@ -115,19 +118,21 @@ let forecast = null;
 document.addEventListener('DOMContentLoaded', async () => {
   loadWeather('weatherNow');
   forecast = await loadForecast();
-  renderCalendar();
-  renderUpcoming();
+  DB.listen('events', (events) => {
+    const evs = events || [];
+    renderCalendar(evs);
+    renderUpcoming(evs);
+  });
 });
 
-function renderCalendar() {
+function renderCalendar(events) {
+  events = events || DB.get('events', []);
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const today = new Date();
 
   document.getElementById('calMonthTitle').textContent =
     new Date(year, month, 1).toLocaleDateString('en-US', {month:'long', year:'numeric'});
-
-  const events = DB.get('events', []);
   const eventsByDate = {};
   events.forEach(ev => { eventsByDate[ev.date] = ev; });
 
@@ -222,15 +227,15 @@ function showDetail(id) {
   document.getElementById('eventDetail').scrollIntoView({behavior:'smooth'});
 }
 
-function calRsvp(id, status) {
+async function calRsvp(id, status) {
   const current = getRsvp(id);
-  setRsvp(id, current === status ? null : status);
+  await setRsvp(id, current === status ? null : status);
   showToast('RSVP updated!');
   showDetail(id);
 }
 
-function renderUpcoming() {
-  const events = DB.get('events', []);
+function renderUpcoming(events) {
+  events = events || DB.get('events', []);
   const today = new Date().toISOString().slice(0,10);
   const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date));
 
@@ -254,14 +259,17 @@ function renderUpcoming() {
 function prevMonth() {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   renderCalendar();
+  renderUpcoming();
 }
 function nextMonth() {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
   renderCalendar();
+  renderUpcoming();
 }
 function goToday() {
   currentDate = new Date();
   renderCalendar();
+  renderUpcoming();
 }
 </script>
 </body>

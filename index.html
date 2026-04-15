@@ -88,16 +88,21 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="app.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   loadWeather('weatherWidget');
-  renderFeed();
-  renderStats();
+  DB.listen('events', (events) => {
+    const evs = events || [];
+    renderStats(evs);
+    renderFeed(evs);
+  });
 });
 
-function renderStats() {
-  const events = DB.get('events', []);
+function renderStats(events) {
   const today = new Date().toISOString().slice(0,10);
   const upcoming = events.filter(e => e.date >= today).length;
   const totalGoing = events.reduce((s,e) => s + e.attendees.going.length, 0);
@@ -111,8 +116,7 @@ function renderStats() {
   `;
 }
 
-function renderFeed() {
-  const events = DB.get('events', []);
+function renderFeed(events) {
   const today = new Date().toISOString().slice(0,10);
   const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date));
 
@@ -164,12 +168,12 @@ function renderFeed() {
   `).join('');
 }
 
-function doRsvp(id, status, btn) {
+async function doRsvp(id, status, btn) {
   const current = getRsvp(id);
   const newStatus = current === status ? null : status;
-  setRsvp(id, newStatus);
+  await setRsvp(id, newStatus);
   showToast(newStatus ? `Marked as "${newStatus}" for this event!` : 'RSVP removed.');
-  renderFeed();
+  // listener auto re-renders
 }
 </script>
 </body>

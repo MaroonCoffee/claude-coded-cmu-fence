@@ -123,6 +123,9 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="app.js"></script>
 <script>
 // Set min date to tomorrow
@@ -135,18 +138,17 @@ document.getElementById('orgDateAlt').min = minDate;
 let currentTab = 'upcoming';
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderQueue();
+  DB.listen('events', (events) => renderQueue(events || []));
 });
 
 function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  renderQueue();
+  renderQueue(DB.get('events', []));
 }
 
-function renderQueue() {
-  const events = DB.get('events', []);
+function renderQueue(events) {
   const today = new Date().toISOString().slice(0,10);
 
   let filtered;
@@ -200,7 +202,7 @@ function renderQueue() {
   `;
 }
 
-function submitQueue() {
+async function submitQueue() {
   const orgName = document.getElementById('orgName').value.trim();
   const orgEmail = document.getElementById('orgEmail').value.trim();
   const orgDate = document.getElementById('orgDate').value;
@@ -233,7 +235,7 @@ function submitQueue() {
   };
 
   events.push(newEvent);
-  DB.set('events', events);
+  await DB.set('events', events);
 
   const d = new Date(orgDate + 'T12:00:00');
   const dateStr = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
@@ -254,7 +256,7 @@ function submitQueue() {
 
   currentTab = 'upcoming';
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===0));
-  renderQueue();
+  // listener auto re-renders
 }
 
 function closeModal() {

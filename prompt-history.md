@@ -35,3 +35,14 @@ Response: Built a full multi-page HTML/CSS/JS website with the following pages:
 - styles.css — Shared stylesheet
 - app.js — Shared JS (localStorage data, RSVP logic, weather API, seed data)
 
+# Prompt 3:
+whenever one user on a separate device makes an input into the queue, another user can't see it so it's kinda useless. How can this be fixed when hosting on github pages? Or is there another tool we need to use to make this data propagate to other users?
+
+Response: Migrated data layer from localStorage to Firebase Realtime Database so all users share the same live data. Changes:
+- Created firebase-config.js (user must fill in their Firebase project credentials)
+- Rewrote app.js DB object to use Firebase Realtime Database with real-time listeners
+- Added Firebase SDK script tags to all 6 HTML pages
+- Updated index.html, queue.html, calendar.html, gallery.html to use DB.listen() for real-time re-rendering
+- Personal RSVP state (going/maybe/notgoing per user) kept in localStorage since there's no auth
+- seedData() now writes to Firebase once instead of localStorage
+
