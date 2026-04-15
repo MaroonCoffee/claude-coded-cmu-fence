@@ -106,6 +106,120 @@
 
 <script src="app.js"></script>
 <script>
+const FENCE_PHOTOS = [
+  {id:10000, date:"2019-11-26", photo:"fences/cmufence_1574802021_2185920250258716806_21617999304.jpg"},
+  {id:10001, date:"2019-11-26", photo:"fences/cmufence_1574802021_2185920250292432430_21617999304.jpg"},
+  {id:10002, date:"2019-11-29", photo:"fences/cmufence_1574987751_2187478265525106718_21617999304.jpg"},
+  {id:10003, date:"2019-11-29", photo:"fences/cmufence_1574987751_2187478265550281914_21617999304.jpg"},
+  {id:10004, date:"2019-12-10", photo:"fences/cmufence_1575998563_2195957568506168853_21617999304.jpg"},
+  {id:10005, date:"2019-12-10", photo:"fences/cmufence_1575998563_2195957568548280684_21617999304.jpg"},
+  {id:10006, date:"2019-12-13", photo:"fences/cmufence_1576266484_2198205053637026984_21617999304.jpg"},
+  {id:10007, date:"2019-12-13", photo:"fences/cmufence_1576266484_2198205053670734970_21617999304.jpg"},
+  {id:10008, date:"2020-01-12", photo:"fences/cmufence_1578862344_2219980705935523609_21617999304.jpg"},
+  {id:10009, date:"2020-01-12", photo:"fences/cmufence_1578862344_2219980705985901760_21617999304.jpg"},
+  {id:10010, date:"2020-01-22", photo:"fences/cmufence_1579734798_2227299377966669403_21617999304.jpg"},
+  {id:10011, date:"2020-01-22", photo:"fences/cmufence_1579734798_2227299378000191645_21617999304.jpg"},
+  {id:10012, date:"2020-01-27", photo:"fences/cmufence_1580149548_2230778558359715072_21617999304.jpg"},
+  {id:10013, date:"2020-01-27", photo:"fences/cmufence_1580149548_2230778558376502073_21617999304.jpg"},
+  {id:10014, date:"2020-02-12", photo:"fences/cmufence_1581531640_2242372387557611377_21617999304.jpg"},
+  {id:10015, date:"2020-02-12", photo:"fences/cmufence_1581531640_2242372387599750605_21617999304.jpg"},
+  {id:10016, date:"2020-02-21", photo:"fences/cmufence_1582320006_2248985675574003399_21617999304.jpg"},
+  {id:10017, date:"2020-02-21", photo:"fences/cmufence_1582320131_2248986723646529814_21617999304.jpg"},
+  {id:10018, date:"2020-02-24", photo:"fences/cmufence_1582568932_2251073820894226740_21617999304.jpg"},
+  {id:10019, date:"2020-02-24", photo:"fences/cmufence_1582568932_2251073820936274345_21617999304.jpg"},
+  {id:10020, date:"2020-02-28", photo:"fences/cmufence_1582914766_2253974882919716464_21617999304.jpg"},
+  {id:10021, date:"2020-02-28", photo:"fences/cmufence_1582914766_2253974882953307957_21617999304.jpg"},
+  {id:10022, date:"2020-03-16", photo:"fences/cmufence_1584367976_2266165296372335497_21617999304.jpg"},
+  {id:10023, date:"2020-03-16", photo:"fences/cmufence_1584367976_2266165296372345850_21617999304.jpg"},
+  {id:10024, date:"2020-03-18", photo:"fences/cmufence_1584491347_2267200208521127583_21617999304.jpg"},
+  {id:10025, date:"2020-03-18", photo:"fences/cmufence_1584491347_2267200208571456029_21617999304.jpg"},
+  {id:10026, date:"2020-03-27", photo:"fences/cmufence_1585267563_2273711578220912706_21617999304.jpg"},
+  {id:10027, date:"2020-03-27", photo:"fences/cmufence_1585267563_2273711578262988482_21617999304.jpg"},
+  {id:10028, date:"2020-05-29", photo:"fences/cmufence_1590767809_2319850982261755805_21617999304.jpg"},
+  {id:10029, date:"2020-05-29", photo:"fences/cmufence_1590767809_2319850982320452377_21617999304.jpg"},
+  {id:10030, date:"2020-06-07", photo:"fences/cmufence_1591562310_2326515742482993882_21617999304.jpg"},
+  {id:10031, date:"2020-06-07", photo:"fences/cmufence_1591562310_2326515742508130033_21617999304.jpg"},
+  {id:10032, date:"2020-09-21", photo:"fences/cmufence_1600702241_2403187042592656666_21617999304.jpg"},
+  {id:10033, date:"2020-09-21", photo:"fences/cmufence_1600702241_2403187042609525233_21617999304.jpg"},
+  {id:10034, date:"2020-10-11", photo:"fences/cmufence_1602426403_2417650355934154501_21617999304.jpg"},
+  {id:10035, date:"2020-10-11", photo:"fences/cmufence_1602426403_2417650355976075227_21617999304.jpg"},
+  {id:10036, date:"2020-11-02", photo:"fences/cmufence_1604336646_2433674641232634780_21617999304.jpg"},
+  {id:10037, date:"2020-11-02", photo:"fences/cmufence_1604336646_2433674641249510394_21617999304.jpg"},
+  {id:10038, date:"2021-01-31", photo:"fences/cmufence_1612125713_2499014070679447713_21617999304.jpg"},
+  {id:10039, date:"2021-01-31", photo:"fences/cmufence_1612125713_2499014070687946713_21617999304.jpg"},
+  {id:10040, date:"2021-03-21", photo:"fences/cmufence_1616355831_2534498872534670896_21617999304.jpg"},
+  {id:10041, date:"2021-03-21", photo:"fences/cmufence_1616355831_2534498872576444510_21617999304.jpg"},
+  {id:10042, date:"2021-04-05", photo:"fences/cmufence_1617633718_2545218563825524677_21617999304.jpg"},
+  {id:10043, date:"2021-04-05", photo:"fences/cmufence_1617633718_2545218563842444130_21617999304.jpg"},
+  {id:10044, date:"2021-04-07", photo:"fences/cmufence_1617802069_2546630797382572227_21617999304.jpg"},
+  {id:10045, date:"2021-04-07", photo:"fences/cmufence_1617802069_2546630797449584942_21617999304.jpg"},
+  {id:10046, date:"2021-04-16", photo:"fences/cmufence_1618576938_2553130867585992226_21617999304.jpg"},
+  {id:10047, date:"2021-04-16", photo:"fences/cmufence_1618576938_2553130867611152465_21617999304.jpg"},
+  {id:10048, date:"2021-04-26", photo:"fences/cmufence_1619445067_2560413257584969059_21617999304.jpg"},
+  {id:10049, date:"2021-04-26", photo:"fences/cmufence_1619445067_2560413257610115723_21617999304.jpg"},
+  {id:10050, date:"2021-05-02", photo:"fences/cmufence_1619965101_2564775624947032163_21617999304.jpg"},
+  {id:10051, date:"2021-05-02", photo:"fences/cmufence_1619965101_2564775624963946187_21617999304.jpg"},
+  {id:10052, date:"2021-05-08", photo:"fences/cmufence_1620489860_2569177615865488946_21617999304.jpg"},
+  {id:10053, date:"2021-05-08", photo:"fences/cmufence_1620489860_2569177616066979289_21617999304.jpg"},
+  {id:10054, date:"2021-05-10", photo:"fences/cmufence_1620659982_2570604703936082899_21617999304.jpg"},
+  {id:10055, date:"2021-05-10", photo:"fences/cmufence_1620659982_2570604703986354714_21617999304.jpg"},
+  {id:10056, date:"2021-05-12", photo:"fences/cmufence_1620833179_2572057589031201295_21617999304.jpg"},
+  {id:10057, date:"2021-05-12", photo:"fences/cmufence_1620833179_2572057589081516318_21617999304.jpg"},
+  {id:10058, date:"2021-06-23", photo:"fences/cmufence_1624460425_2602485132782092602_21617999304.jpg"},
+  {id:10059, date:"2021-06-23", photo:"fences/cmufence_1624461020_2602490120749136434_21617999304.jpg"},
+  {id:10060, date:"2021-06-23", photo:"fences/cmufence_1624461020_2602490120774144672_21617999304.jpg"},
+  {id:10061, date:"2021-06-23", photo:"fences/cmufence_1624462058_2602498833417458441_21617999304.jpg"},
+  {id:10062, date:"2021-06-23", photo:"fences/cmufence_1624462058_2602498833450945328_21617999304.jpg"},
+  {id:10063, date:"2021-07-03", photo:"fences/cmufence_1625320794_2609702432162984712_21617999304.jpg"},
+  {id:10064, date:"2021-07-03", photo:"fences/cmufence_1625320794_2609702432255315745_21617999304.jpg"},
+  {id:10065, date:"2021-07-09", photo:"fences/cmufence_1625794801_2613678690379058621_21617999304.jpg"},
+  {id:10066, date:"2021-07-09", photo:"fences/cmufence_1625794801_2613678690538365634_21617999304.jpg"},
+  {id:10067, date:"2021-07-16", photo:"fences/cmufence_1626461950_2619275142751420884_21617999304.jpg"},
+  {id:10068, date:"2021-07-16", photo:"fences/cmufence_1626461950_2619275142902367945_21617999304.jpg"},
+  {id:10069, date:"2021-07-21", photo:"fences/cmufence_1626829531_2622358638115456300_21617999304.jpg"},
+  {id:10070, date:"2021-07-21", photo:"fences/cmufence_1626829531_2622358638149024626_21617999304.jpg"},
+  {id:10071, date:"2021-08-06", photo:"fences/cmufence_1628259660_2634355423228867589_21617999304.jpg"},
+  {id:10072, date:"2021-08-06", photo:"fences/cmufence_1628259660_2634355423279172179_21617999304.jpg"},
+  {id:10073, date:"2021-08-15", photo:"fences/cmufence_1629062594_2641090922012811174_21617999304.jpg"},
+  {id:10074, date:"2021-08-15", photo:"fences/cmufence_1629062594_2641090922037932662_21617999304.jpg"},
+  {id:10075, date:"2021-08-22", photo:"fences/cmufence_1629645771_2645982966889455823_21617999304.jpg"},
+  {id:10076, date:"2021-08-22", photo:"fences/cmufence_1629645771_2645982966931377164_21617999304.jpg"},
+  {id:10077, date:"2021-08-24", photo:"fences/cmufence_1629807684_2647341191006078046_21617999304.jpg"},
+  {id:10078, date:"2021-08-24", photo:"fences/cmufence_1629807684_2647341191115183646_21617999304.jpg"},
+  {id:10079, date:"2021-08-26", photo:"fences/cmufence_1629980656_2648792188094009298_21617999304.jpg"},
+  {id:10080, date:"2021-08-26", photo:"fences/cmufence_1629980656_2648792188337501456_21617999304.jpg"},
+  {id:10081, date:"2021-08-27", photo:"fences/cmufence_1630070570_2649546440026068052_21617999304.jpg"},
+  {id:10082, date:"2021-08-27", photo:"fences/cmufence_1630070570_2649546440034461256_21617999304.jpg"},
+  {id:10083, date:"2021-08-28", photo:"fences/cmufence_1630164964_2650338277469417409_21617999304.jpg"},
+  {id:10084, date:"2021-08-28", photo:"fences/cmufence_1630164964_2650338277502813445_21617999304.jpg"},
+  {id:10085, date:"2021-09-03", photo:"fences/cmufence_1630673274_2654602288427738354_21617999304.jpg"},
+  {id:10086, date:"2021-09-03", photo:"fences/cmufence_1630673274_2654602288494848194_21617999304.jpg"},
+  {id:10087, date:"2021-09-04", photo:"fences/cmufence_1630758913_2655320681225161816_21617999304.jpg"},
+  {id:10088, date:"2021-09-07", photo:"fences/cmufence_1631022328_2657530362928762624_21617999304.jpg"},
+  {id:10089, date:"2021-09-07", photo:"fences/cmufence_1631022328_2657530363205420938_21617999304.jpg"},
+  {id:10090, date:"2021-09-09", photo:"fences/cmufence_1631191763_2658951690969851160_21617999304.jpg"},
+  {id:10091, date:"2021-09-09", photo:"fences/cmufence_1631191763_2658951691229964306_21617999304.jpg"},
+  {id:10092, date:"2021-09-10", photo:"fences/cmufence_1631299383_2659854472290126015_21617999304.jpg"},
+  {id:10093, date:"2021-09-10", photo:"fences/cmufence_1631299383_2659854472357217779_21617999304.jpg"},
+  {id:10094, date:"2021-09-14", photo:"fences/cmufence_1631626443_2662598045632751340_21617999304.jpg"},
+  {id:10095, date:"2021-09-14", photo:"fences/cmufence_1631626443_2662598045683041552_21617999304.jpg"},
+  {id:10096, date:"2021-09-15", photo:"fences/cmufence_1631733110_2663492838734896617_21617999304.jpg"},
+  {id:10097, date:"2021-09-15", photo:"fences/cmufence_1631733110_2663492838768464074_21617999304.jpg"},
+  {id:10098, date:"2021-09-24", photo:"fences/cmufence_1632508712_2669999055757986294_21617999304.jpg"},
+  {id:10099, date:"2021-09-24", photo:"fences/cmufence_1632508712_2669999055833593532_21617999304.jpg"},
+  {id:10100, date:"2021-09-27", photo:"fences/cmufence_1632749594_2672019725406333507_21617999304.jpg"},
+  {id:10101, date:"2021-09-27", photo:"fences/cmufence_1632749594_2672019725439782225_21617999304.jpg"},
+  {id:10102, date:"2021-09-29", photo:"fences/cmufence_1632921127_2673458646933685111_21617999304.jpg"},
+  {id:10103, date:"2021-09-29", photo:"fences/cmufence_1632921127_2673458646933830590_21617999304.jpg"},
+  {id:10104, date:"2021-10-11", photo:"fences/cmufence_1633953708_2682120560553995664_21617999304.webp"},
+  {id:10105, date:"2021-10-11", photo:"fences/cmufence_1633953708_2682120560612670525_21617999304.webp"},
+];
+
+// Merge DB gallery entries + static fence photos into one list
+function getAllGalleryItems() {
+  return [...DB.get('gallery', []), ...FENCE_PHOTOS];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   DB.listen('gallery', () => renderGallery());
 });
@@ -114,11 +228,12 @@ function renderGallery() {
   const search = document.getElementById('searchInput').value.toLowerCase();
   const sort = document.getElementById('sortSelect').value;
 
-  let items = DB.get('gallery', []);
+  let items = getAllGalleryItems();
   if (search) items = items.filter(g =>
-    g.org.toLowerCase().includes(search) ||
-    g.design.toLowerCase().includes(search) ||
-    (g.desc || '').toLowerCase().includes(search)
+    (g.org || '').toLowerCase().includes(search) ||
+    (g.design || '').toLowerCase().includes(search) ||
+    (g.desc || '').toLowerCase().includes(search) ||
+    g.date.includes(search)
   );
   items = [...items].sort((a,b) => {
     const cmp = a.date.localeCompare(b.date);
@@ -131,18 +246,22 @@ function renderGallery() {
     return;
   }
 
-  grid.innerHTML = items.map(g => `
-    <div class="gallery-card" onclick="openGalleryModal(${g.id})">
-      <div class="gallery-img" style="background:linear-gradient(135deg,${g.color || '#888'}33,${g.color || '#888'}66)">
-        <span style="font-size:4rem">${g.imageEmoji || '🎨'}</span>
-      </div>
+  grid.innerHTML = items.map(g => {
+    const thumb = g.photo
+      ? `<img src="${g.photo}" alt="Fence photo" style="width:100%;height:100%;object-fit:cover;display:block;">`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+           background:linear-gradient(135deg,${g.color||'#888'}33,${g.color||'#888'}66)">
+           <span style="font-size:4rem">${g.imageEmoji || '🎨'}</span>
+         </div>`;
+    return `<div class="gallery-card" onclick="openGalleryModal(${g.id})">
+      <div class="gallery-img" style="padding:0;overflow:hidden">${thumb}</div>
       <div class="gallery-info">
-        <div class="gallery-org">${g.org}</div>
+        ${g.org ? `<div class="gallery-org">${g.org}</div>` : ''}
         <div class="gallery-date">${formatDate(g.date)}</div>
-        <div class="gallery-desc">${g.design}</div>
+        ${g.design ? `<div class="gallery-desc">${g.design}</div>` : ''}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function formatDate(dateStr) {
@@ -151,18 +270,21 @@ function formatDate(dateStr) {
 }
 
 function openGalleryModal(id) {
-  const items = DB.get('gallery', []);
+  const items = getAllGalleryItems();
   const g = items.find(i => i.id === id);
   if (!g) return;
 
+  const photoHTML = g.photo
+    ? `<img src="${g.photo}" alt="Fence photo"
+         style="width:100%;border-radius:10px;display:block;margin-bottom:14px;aspect-ratio:4/3;object-fit:cover;">`
+    : `<div style="font-size:5rem;background:linear-gradient(135deg,${g.color||'#888'}33,${g.color||'#888'}66);
+         border-radius:12px;padding:32px;margin-bottom:14px;text-align:center">${g.imageEmoji || '🎨'}</div>`;
+
   document.getElementById('modalContent').innerHTML = `
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:5rem;background:linear-gradient(135deg,${g.color||'#888'}33,${g.color||'#888'}66);
-        border-radius:12px;padding:32px;margin-bottom:12px">${g.imageEmoji || '🎨'}</div>
-    </div>
-    <div class="modal-title">${g.org}</div>
-    <div style="font-size:0.85rem;color:#888;margin-bottom:10px">${formatDate(g.date)}</div>
-    <div style="font-weight:600;margin-bottom:8px">${g.design}</div>
+    ${photoHTML}
+    ${g.org ? `<div class="modal-title">${g.org}</div>` : ''}
+    <div style="font-size:0.85rem;color:#888;margin-bottom:8px">${formatDate(g.date)}</div>
+    ${g.design ? `<div style="font-weight:600;margin-bottom:8px">${g.design}</div>` : ''}
     ${g.desc ? `<div style="font-size:0.92rem;color:#555;line-height:1.6">${g.desc}</div>` : ''}
   `;
   document.getElementById('galleryModal').classList.add('open');
@@ -197,7 +319,6 @@ async function addGalleryEntry() {
     document.getElementById(id).value = '';
   });
   document.getElementById('submitForm').style.display = 'none';
-  // listener auto re-renders
 }
 </script>
 </body>
